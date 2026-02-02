@@ -71,3 +71,7 @@
       </div>
     </footer>
 </template>
+
+<script setup>
+import { MapPin, Megaphone, Phone, Mail } from 'lucide-vue-next'
+</script>

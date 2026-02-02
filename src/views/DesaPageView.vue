@@ -8,7 +8,7 @@
       <div class="relative h-[450px] md:h-[550px] flex items-end overflow-hidden group">
         <div class="absolute inset-0">
           <img 
-            src="https://images.unsplash.com/photo-1625246333195-78d9c38ad449?q=80&w=2680&auto=format&fit=crop" 
+            :src="berita" 
             alt="Berita Desa" 
             class="w-full h-full object-cover transition-transform duration-[15s] group-hover:scale-110"
           />
@@ -62,11 +62,9 @@
                       <span v-if="isUrgent(featuredNews[0])" class="bg-red-500 text-white text-[10px] font-black px-4 py-1.5 rounded-full shadow-lg shadow-red-500/40 uppercase">Penting</span>
                       <span class="bg-emerald-500 text-white text-[10px] font-black px-4 py-1.5 rounded-full uppercase border border-white/20">{{ featuredNews[0].tipe }}</span>
                     </div>
-                    
                     <h2 class="text-3xl md:text-5xl font-extrabold text-white mb-6 leading-tight group-hover:text-emerald-300 transition-colors line-clamp-2">
                       {{ featuredNews[0].title }}
                     </h2>
-                    
                     <div class="flex items-center gap-6 text-white/60 text-sm font-bold pt-6 border-t border-white/10">
                       <span class="flex items-center gap-2 group-hover:text-white transition-colors"><User class="w-5 h-5 text-emerald-400" /> {{ featuredNews[0].penulis || 'Redaksi Desa' }}</span>
                     </div>
@@ -90,7 +88,12 @@
                 </button>
               </div>
 
-              <div v-if="paginatedNews.length > 0" class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-16">
+              <div v-if="paginatedNews.length === 0" class="py-20 text-center bg-white rounded-3xl border border-dashed border-slate-200">
+                <p class="text-slate-400 font-bold">Tidak ada berita ditemukan untuk kategori ini.</p>
+                <button @click="setCategory('Semua')" class="mt-4 text-emerald-600 text-sm font-black uppercase">Lihat Semua Berita</button>
+              </div>
+
+              <div v-else class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-16">
                 <article 
                   v-for="(news, idx) in paginatedNews" 
                   :key="news.id" 
@@ -111,15 +114,12 @@
                       <span class="w-6 h-[2px] bg-emerald-500"></span>
                       <span>{{ formatDate(news.tanggal) }}</span>
                     </div>
-
                     <h3 class="text-xl font-bold text-slate-800 mb-4 leading-snug group-hover:text-emerald-700 transition-colors line-clamp-2">
                       {{ news.title }}
                     </h3>
-                    
                     <p class="text-slate-500 text-sm leading-relaxed mb-8 line-clamp-3 font-medium">
                       {{ stripHtml(news.isi) }}
                     </p>
-
                     <div class="mt-auto pt-6 border-t border-slate-50 flex items-center justify-between">
                         <div class="flex items-center gap-3">
                           <img class="w-10 h-10 rounded-full border-2 border-emerald-50" :src="`https://ui-avatars.com/api/?name=${news.penulis || 'Admin'}&background=10b981&color=fff`" />
@@ -166,7 +166,7 @@
               <div class="bg-slate-900 p-8 text-white flex justify-between items-center">
                 <div>
                   <h3 class="font-black text-xl tracking-tighter">Agenda Desa</h3>
-                  <p class="text-white/50 text-[10px] font-bold uppercase tracking-widest mt-1">Januari 2026</p>
+                  <p class="text-white/50 text-[10px] font-bold uppercase tracking-widest mt-1">Update 2026</p>
                 </div>
                 <Calendar class="w-8 h-8 text-emerald-500 opacity-50" />
               </div>
@@ -209,23 +209,7 @@
                 </button>
               </div>
             </div>
-
-            <div class="bg-gradient-to-br from-emerald-600 to-emerald-800 p-8 rounded-[2.5rem] text-white shadow-2xl relative overflow-hidden">
-               <div class="absolute -left-10 -bottom-10 w-40 h-40 bg-white/10 rounded-full blur-2xl"></div>
-               <h3 class="font-black text-lg mb-6 relative">Statistik Berita</h3>
-               <div class="grid grid-cols-2 gap-4 relative">
-                  <div class="bg-white/10 backdrop-blur-sm rounded-2xl p-4 border border-white/10">
-                     <span class="block text-2xl font-black">{{ allNews.length }}</span>
-                     <span class="text-[10px] font-bold uppercase opacity-60">Total Artikel</span>
-                  </div>
-                  <div class="bg-white/10 backdrop-blur-sm rounded-2xl p-4 border border-white/10">
-                     <span class="block text-2xl font-black">{{ upcomingAgendas.length }}</span>
-                     <span class="text-[10px] font-bold uppercase opacity-60">Agenda Dekat</span>
-                  </div>
-               </div>
-            </div>
           </aside>
-
         </div>
       </div>
     </div>
@@ -240,9 +224,9 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue';
+import { ref, computed, onMounted, watch } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
-import BeritaPerPage from './BeritaPerPage.vue';
+import berita from "@/assets/berita-image.jpeg"
 import { 
   Search, Calendar, User, ArrowRight, 
   ChevronLeft, ChevronRight, Clock, MapPin 
@@ -262,7 +246,6 @@ const isLoadingAgenda = ref(true);
 
 const allNews = ref([]);
 const allAgendas = ref([]);
-
 const categories = ['Semua', 'Pengumuman', 'Pembangunan', 'Kegiatan', 'Layanan'];
 
 // --- HELPERS ---
@@ -303,15 +286,27 @@ const loadData = async () => {
     const { data: newsData } = await fetchSupabase('berita', 'select=*&order=tanggal.desc');
     if (newsData) allNews.value = newsData;
 
-    // Current time context for agenda sorting
     const today = new Date().toISOString().split('T')[0];
     const { data: agendaData } = await fetchSupabase('agenda', `select=*&tanggal=gte.${today}&order=tanggal.asc&limit=4`);
     if (agendaData) allAgendas.value = agendaData;
+    
+    // CEK FILTER DARI ROUTER QUERY
+    checkRouteFilter();
+
   } catch (e) {
-    console.error('Error fetching news:', e);
+    console.error('Error fetching data:', e);
   } finally {
     isLoading.value = false;
     isLoadingAgenda.value = false;
+  }
+};
+
+const checkRouteFilter = () => {
+  const filter = route.query.filter;
+  if (filter && categories.includes(filter)) {
+    selectedCategory.value = filter;
+  } else {
+    selectedCategory.value = 'Semua';
   }
 };
 
@@ -336,11 +331,23 @@ const getImageUrl = (news) => news.image_url || 'https://images.unsplash.com/pho
 const getCategoryColor = (news) => isUrgent(news) ? 'bg-red-500 text-white' : 'bg-emerald-600 text-white';
 
 // --- ACTIONS ---
-const setCategory = (cat) => { selectedCategory.value = cat; currentPage.value = 1; };
+const setCategory = (cat) => { 
+  selectedCategory.value = cat; 
+  currentPage.value = 1; 
+  // Update URL tanpa reload agar sinkron
+  router.replace({ query: { ...route.query, filter: cat === 'Semua' ? undefined : cat } });
+};
+
 const nextPage = () => { if (currentPage.value < totalPages.value) { currentPage.value++; window.scrollTo({top: 400, behavior: 'smooth'}); } };
 const prevPage = () => { if (currentPage.value > 1) { currentPage.value--; window.scrollTo({top: 400, behavior: 'smooth'}); } };
 const openAgenda = () => router.push({ name: 'agenda' });
 const openNews = (id) => router.push({ name: 'beritaperpage', query: { id } });
+
+// Pantau jika user klik link "Berita" lagi tapi dengan filter berbeda
+watch(() => route.query.filter, (newFilter) => {
+  if (newFilter) selectedCategory.value = newFilter;
+  else selectedCategory.value = 'Semua';
+});
 
 onMounted(loadData);
 </script>

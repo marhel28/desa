@@ -19,6 +19,7 @@
     "@tailwindcss/vite": "^4.1.18",
     "lucide-vue-next": "^0.562.0",
     "pinia": "^3.0.4",
+    "swiper": "^12.1.0",
     "tailwindcss": "^4.1.18",
     "v-calendar": "^3.1.2",
     "vue": "^3.5.26",

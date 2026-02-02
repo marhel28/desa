@@ -5,15 +5,29 @@
       
       <section class="relative h-[650px] flex items-center justify-center overflow-hidden">
         <div class="absolute inset-0 z-0">
-          <img 
-            :src="desaInfo?.cover_desa_path || 'https://images.unsplash.com/photo-1500382017468-9049fed747ef?q=80&w=2832&auto=format&fit=crop'" 
-            alt="Pemandangan Desa" 
-            class="w-full h-full object-cover object-center"
-          />
-          <div class="absolute inset-0 bg-gradient-to-br from-emerald-900/90 via-emerald-800/80 to-slate-900/60 mix-blend-multiply"></div>
+          <swiper
+            v-if="coverList.length > 0"
+            :modules="[SwiperAutoplay, SwiperEffectFade]"
+            :effect="'fade'"
+            :autoplay="{ delay: 5000, disableOnInteraction: false }"
+            :loop="true"
+            class="w-full h-full"
+          >
+            <swiper-slide v-for="(img, idx) in coverList" :key="idx">
+              <div class="relative w-full h-full">
+                <img 
+                  :src="img" 
+                  alt="Pemandangan Desa" 
+                  class="w-full h-full object-cover object-center scale-110 animate-slow-zoom"
+                />
+              </div>
+            </swiper-slide>
+          </swiper>
+          
+          <div class="absolute inset-0 bg-gradient-to-br from-emerald-900/90 via-emerald-800/80 to-slate-900/60 mix-blend-multiply z-10"></div>
         </div>
 
-        <div class="relative z-10 text-center text-white px-4 max-w-5xl mx-auto mt-[-40px]">
+        <div class="relative z-20 text-center text-white px-4 max-w-5xl mx-auto mt-[-40px]">
           <div class="inline-flex items-center gap-2 py-1.5 px-4 rounded-full bg-white/10 border border-white/20 backdrop-blur-md text-sm font-medium mb-6 animate-fade-in-down shadow-lg">
             <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
             Selamat Datang di Portal Resmi
@@ -31,7 +45,7 @@
           </p>
 
           <div class="flex flex-col sm:flex-row gap-4 justify-center animate-fade-in-up delay-300">
-            <button @click="navigate('profile')" class="group bg-emerald-500 hover:bg-emerald-400 text-white px-8 py-4 rounded-full font-bold shadow-[0_10px_20px_-10px_rgba(16,185,129,0.5)] transition-all transform hover:-translate-y-1 flex items-center justify-center gap-2 ring-4 ring-emerald-500/20">
+            <button @click="navigate('/profile')" class="group bg-emerald-500 hover:bg-emerald-400 text-white px-8 py-4 rounded-full font-bold shadow-[0_10px_20px_-10px_rgba(16,185,129,0.5)] transition-all transform hover:-translate-y-1 flex items-center justify-center gap-2 ring-4 ring-emerald-500/20">
               Jelajahi Desa
               <ArrowRight class="w-5 h-5 group-hover:translate-x-1 transition-transform" />
             </button>
@@ -62,7 +76,6 @@
               </div>
               <h3 v-if="isLoading" class="text-2xl font-extrabold text-gray-300 animate-pulse">Loading...</h3>
               <h3 v-else class="text-4xl font-extrabold text-slate-800 mb-1">{{ stat.value }}</h3>
-              
               <p class="text-slate-500 font-medium text-sm uppercase tracking-wider">{{ stat.label }}</p>
             </div>
           </div>
@@ -109,7 +122,7 @@
                 </div>
                 
                 <div class="p-4 bg-slate-50 border-t border-slate-100 text-center">
-                  <button class="text-sm font-bold text-emerald-600 hover:text-emerald-800 flex items-center justify-center gap-1 mx-auto group">
+                  <button @click="go('Berita desa','Pengumuman')"  class="text-sm font-bold text-emerald-600 hover:text-emerald-800 flex items-center justify-center gap-1 mx-auto group">
                     Lihat Arsip Pengumuman
                     <ArrowRight class="w-4 h-4 group-hover:translate-x-1 transition-transform"/>
                   </button>
@@ -217,7 +230,7 @@
               </div>
             </div>
 
-             <div>
+            <div>
                 <div class="flex items-center justify-between mb-6">
                    <h2 class="text-2xl font-bold text-slate-800">Berita Terbaru</h2>
                    <a href="#" class="text-sm font-bold text-emerald-600 hover:text-emerald-800 flex items-center gap-1">
@@ -263,15 +276,20 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue';
-import { useRouter } from 'vue-router'; // Optional jika pakai router
+import { ref, onMounted, computed } from 'vue';
+import { useRouter } from 'vue-router'; 
+// Import Swiper & Modules
+import { Swiper, SwiperSlide } from 'swiper/vue';
+import { Autoplay as SwiperAutoplay, EffectFade as SwiperEffectFade } from 'swiper/modules';
+import 'swiper/css';
+import 'swiper/css/effect-fade';
+
 import { 
   Users, MapPin, TrendingUp, ArrowRight, 
   FileText, Megaphone, LayoutGrid, Pin, Calendar
 } from 'lucide-vue-next';
 import { fetchSupabase } from '@/service/api.js';
-
-// const router = useRouter(); // Uncomment jika pakai vue-router
+import router from '@/router';
 
 const desaInfo = ref(null);
 const statistikInfo = ref(null);
@@ -280,6 +298,23 @@ const isLoading = ref(true);
 const pinnedNews = ref([]);
 const agendaList = ref([]);
 const latestNews = ref([]);
+const go = (page, category = null) => {
+  if (category) {
+    router.push({ name: page, query: { filter: category } });
+  } else {
+    router.push({ name: page });
+  }
+};
+
+// Computed untuk mengolah cover_path dari database (string dipisah koma)
+const coverList = computed(() => {
+  if (desaInfo.value?.cover_desa_path) {
+    // Pecah berdasarkan koma, lalu bersihkan spasi
+    return desaInfo.value.cover_desa_path.split(',').map(item => item.trim());
+  }
+  // Fallback default
+  return ['https://images.unsplash.com/photo-1500382017468-9049fed747ef?q=80&w=2832&auto=format&fit=crop'];
+});
 
 const stats = ref([
   { 
@@ -299,53 +334,28 @@ const stats = ref([
   { 
     icon: TrendingUp, 
     label: 'Dana Desa Terserap', 
-    value: '94%', // Data dummy karena tidak ada di schema statistik
+    value: '94%', 
     bgColor: 'bg-amber-50', 
     textColor: 'text-amber-600' 
   },
 ]);
 
 const highlights = [
-  {
-    title: 'Profil & Visi Misi',
-    description: 'Kenali sejarah, visi, misi, serta struktur pemerintahan desa yang melayani Anda.',
-    action: 'profile',
-    icon: FileText
-  },
-  {
-    title: 'Transparansi Desa',
-    description: 'Akses laporan APBDes, realisasi anggaran, dan dokumentasi pembangunan secara terbuka.',
-    action: 'transparansi',
-    icon: TrendingUp
-  },
-  {
-    title: 'Layanan Mandiri',
-    description: 'Urus surat pengantar, SKCK, dan administrasi kependudukan dari rumah secara online.',
-    action: 'services',
-    icon: LayoutGrid
-  },
-  {
-    title: 'Potensi & UMKM',
-    description: 'Galeri produk unggulan desa, pariwisata, dan potensi ekonomi kreatif warga.',
-    action: 'potensi',
-    icon: Megaphone
-  },
+  { title: 'Profil & Visi Misi', description: 'Kenali sejarah, visi, misi, serta struktur pemerintahan desa yang melayani Anda.', action: 'profile', icon: FileText },
+  { title: 'Transparansi Desa', description: 'Akses laporan APBDes, realisasi anggaran, dan dokumentasi pembangunan secara terbuka.', action: 'transparansi', icon: TrendingUp },
+  { title: 'Layanan Mandiri', description: 'Urus surat pengantar, SKCK, dan administrasi kependudukan dari rumah secara online.', action: 'services', icon: LayoutGrid },
+  { title: 'Potensi & UMKM', description: 'Galeri produk unggulan desa, pariwisata, dan potensi ekonomi kreatif warga.', action: 'potensi', icon: Megaphone },
 ];
 
-// --- API LOADING LOGIC ---
 const loadDashboardData = async () => {
   isLoading.value = true;
   try {
-    // 1. Fetch Desa Profile
     const { data: desa } = await fetchSupabase('desa', 'select=*&limit=1');
     if (desa && desa.length > 0) desaInfo.value = desa[0];
 
-    // 2. Fetch Statistik
     const { data: stat } = await fetchSupabase('statistik_desa', 'select=*&limit=1');
     if (stat && stat.length > 0) statistikInfo.value = stat[0];
 
-    // 3. Fetch Agenda (Upcoming)
-    // Order by tanggal ascending (yang terdekat dulu)
     const { data: agendas } = await fetchSupabase('agenda', 'select=*&order=tanggal.asc&limit=4');
     if (agendas) {
         agendaList.value = agendas.map(item => ({
@@ -355,8 +365,6 @@ const loadDashboardData = async () => {
         }));
     }
 
-    // 4. Fetch Info Penting (Pengumuman)
-    // Ambil berita yang tipenya 'pengumuman'
     const { data: announcements } = await fetchSupabase('berita', 'select=*&tipe=eq.pengumuman&order=tanggal.desc&limit=5');
     if (announcements) {
         pinnedNews.value = announcements.map(item => ({
@@ -366,15 +374,12 @@ const loadDashboardData = async () => {
         }));
     }
 
-    // 5. Fetch Berita Terbaru (Umum)
     const { data: news } = await fetchSupabase('berita', 'select=*&order=tanggal.desc&limit=2');
     if (news) latestNews.value = news;
 
-    // 6. Update UI Stats
     updateStatsUI();
-
   } catch (e) {
-    console.error("Unexpected error loading dashboard:", e);
+    console.error("Error loading dashboard:", e);
   } finally {
     isLoading.value = false;
   }
@@ -389,71 +394,53 @@ const updateStatsUI = () => {
   }
 };
 
-// --- HELPERS ---
 const navigate = (page) => {
-  console.log(`Navigasi ke halaman: ${page}`);
-  // if (router) router.push({ name: page });
+  router.push(page)
 };
+const formatDateFull = (date) => date ? new Date(date).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' }) : '';
+const formatTimeRange = (start, end) => start ? `${start.substring(0, 5)} WIB - ${end ? end.substring(0, 5) : 'Selesai'} WIB` : 'Waktu Belum Ditentukan';
+const stripHtml = (html) => { if(!html) return ''; let tmp = document.createElement("DIV"); tmp.innerHTML = html; return tmp.textContent || tmp.innerText || ""; }
 
-const formatDateFull = (dateString) => {
-    if (!dateString) return '';
-    return new Date(dateString).toLocaleDateString('id-ID', { 
-        day: 'numeric', month: 'long', year: 'numeric' 
-    });
-};
-
-const formatTimeRange = (start, end) => {
-    if (!start) return 'Waktu Belum Ditentukan';
-    // Slice untuk menghilangkan detik (09:00:00 -> 09:00)
-    const s = start.substring(0, 5);
-    const e = end ? end.substring(0, 5) : 'Selesai';
-    return `${s} WIB - ${e} WIB`;
-};
-
-const stripHtml = (html) => {
-   if(!html) return '';
-   // Membuat element temporary untuk mengambil text content saja
-   let tmp = document.createElement("DIV");
-   tmp.innerHTML = html;
-   return tmp.textContent || tmp.innerText || "";
-}
-
-// --- LIFECYCLE ---
 onMounted(() => {
   loadDashboardData();
 });
 </script>
 
 <style scoped>
-/* Google Font Import */
 @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800&display=swap');
 
-/* Animations */
+/* Slow Zoom Effect Background */
+.animate-slow-zoom {
+  animation: slowZoom 20s infinite alternate linear;
+}
+@keyframes slowZoom {
+  from { transform: scale(1); }
+  to { transform: scale(1.15); }
+}
+
+/* Base Animations */
 .animate-fade-in-up {
   animation: fadeInUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
   opacity: 0;
   transform: translateY(30px);
 }
-
 .animate-fade-in-down {
   animation: fadeInDown 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
   opacity: 0;
   transform: translateY(-30px);
 }
-
 .delay-100 { animation-delay: 0.1s; }
 .delay-200 { animation-delay: 0.2s; }
 .delay-300 { animation-delay: 0.3s; }
 
-@keyframes fadeInUp {
-  to { opacity: 1; transform: translateY(0); }
-}
-
-@keyframes fadeInDown {
-  to { opacity: 1; transform: translateY(0); }
-}
+@keyframes fadeInUp { to { opacity: 1; transform: translateY(0); } }
+@keyframes fadeInDown { to { opacity: 1; transform: translateY(0); } }
 
 .bg-pattern {
   background-image: url("data:image/svg+xml,%3Csvg width='20' height='20' viewBox='0 0 20 20' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%23ffffff' fill-opacity='0.4' fill-rule='evenodd'%3E%3Ccircle cx='3' cy='3' r='3'/%3E%3Ccircle cx='13' cy='13' r='3'/%3E%3C/g%3E%3C/svg%3E");
+}
+
+:deep(.swiper-slide) {
+  overflow: hidden;
 }
 </style>

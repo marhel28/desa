@@ -162,7 +162,7 @@
     </div>
 
     <transition name="modal">
-      <div v-if="isModalOpen && selectedItem" class="fixed inset-0 z-50 flex items-center justify-center p-4">
+      <div v-if="isModalOpen && selectedItem" class="fixed inset-0 z-[100] flex items-center justify-center p-4">
         <div class="absolute inset-0 bg-slate-900/80 backdrop-blur-sm transition-opacity" @click="closeModal"></div>
         
         <div class="bg-white rounded-3xl w-full max-w-5xl h-[90vh] md:h-auto md:max-h-[90vh] overflow-y-auto shadow-2xl relative z-10 flex flex-col md:flex-row overflow-hidden animate-modal-up">
@@ -271,6 +271,7 @@
 
 <script setup>
 import { ref, computed, onMounted } from 'vue';
+import berita from "@/assets/berita-image.jpeg"
 import { 
   LayoutGrid, Mountain, Palette, Sprout, 
   Fish, Users, MoreHorizontal, Store, MapPin, 

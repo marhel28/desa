@@ -4,10 +4,10 @@
     <div class="relative h-[450px] lg:h-[550px] flex items-center justify-center overflow-hidden">
       <div class="absolute inset-0">
         <img 
-          :src="desaInfo?.cover_desa_path || 'https://images.unsplash.com/photo-1625246333195-78d9c38ad449?q=80&w=2940&auto=format&fit=crop'" 
-          alt="Cover Desa" 
-          class="w-full h-full object-cover transform scale-105 animate-slow-zoom"
-        />
+  :src="desaInfo?.cover_desa_path?.split(',')[0] || 'https://images.unsplash.com/photo-1625246333195-78d9c38ad449?q=80&w=2940&auto=format&fit=crop'" 
+  alt="Cover Desa" 
+  class="w-full h-full object-cover transform scale-105 animate-slow-zoom"
+/>
         <div class="absolute inset-0 bg-gradient-to-b from-emerald-950/90 via-emerald-900/70 to-slate-50"></div>
       </div>
       
@@ -31,7 +31,7 @@
           {{ desaInfo?.nama_desa || 'Desa Digital' }}
         </h1>
 
-        <nav class="flex justify-center items-center gap-3 text-emerald-100 text-sm font-medium bg-emerald-900/40 py-2.5 px-8 rounded-full w-fit mx-auto backdrop-blur-md border border-emerald-500/30">
+        <nav class="flex justify-center items-center gap-3 mb- text-emerald-100 text-sm font-medium bg-emerald-900/40 py-2.5 px-8 rounded-full w-fit mx-auto backdrop-blur-md border border-emerald-500/30">
           <router-link to="/" class="hover:text-white transition-colors">Beranda</router-link>
           <span class="opacity-40">/</span>
           <span class="text-white">Profil Desa</span>
