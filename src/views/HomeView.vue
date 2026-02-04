@@ -49,7 +49,7 @@
               Jelajahi Desa
               <ArrowRight class="w-5 h-5 group-hover:translate-x-1 transition-transform" />
             </button>
-            <button @click="navigate('services')" class="group bg-white/10 backdrop-blur-md border border-white/30 text-white px-8 py-4 rounded-full font-bold hover:bg-white/20 transition-all flex items-center justify-center gap-2">
+            <button @click="navigate('/services')" class="group bg-white/10 backdrop-blur-md border border-white/30 text-white px-8 py-4 rounded-full font-bold hover:bg-white/20 transition-all flex items-center justify-center gap-2">
               Layanan Online
               <div class="w-2 h-2 bg-emerald-400 rounded-full group-hover:scale-150 transition-transform"></div>
             </button>
@@ -103,7 +103,7 @@
                 </div>
 
                 <div v-else class="divide-y divide-slate-100">
-                  <article v-for="(news, idx) in pinnedNews" :key="idx" class="p-5 hover:bg-emerald-50/60 transition-colors group cursor-pointer">
+                  <article v-for="(news, idx) in pinnedNews" :key="idx" @click="goToBerita(news.id)" class="p-5 hover:bg-emerald-50/60 transition-colors group cursor-pointer">
                     <div class="flex gap-4">
                       <div class="flex-col items-center hidden sm:flex min-w-[50px]">
                          <div class="text-xs font-bold text-slate-400 uppercase">{{ news.dateOnly }}</div>
@@ -161,7 +161,7 @@
                 </div>
 
                  <div class="mt-6 pt-4 border-t border-slate-100 text-center">
-                    <button class="text-xs font-bold text-slate-500 hover:text-emerald-600 uppercase tracking-wider">
+                    <button @click="navigate('/berita/agenda')" class="text-xs font-bold text-slate-500 hover:text-emerald-600 uppercase tracking-wider">
                       Lihat Kalender Lengkap
                     </button>
                  </div>
@@ -233,7 +233,7 @@
             <div>
                 <div class="flex items-center justify-between mb-6">
                    <h2 class="text-2xl font-bold text-slate-800">Berita Terbaru</h2>
-                   <a href="#" class="text-sm font-bold text-emerald-600 hover:text-emerald-800 flex items-center gap-1">
+                   <a href="#" @click.prevent="navigate('/berita')" class="text-sm font-bold text-emerald-600 hover:text-emerald-800 flex items-center gap-1">
                      Lihat Semua <ArrowRight class="w-4 h-4"/>
                    </a>
                 </div>
@@ -258,7 +258,7 @@
                            {{ news.title }}
                          </h3>
                          <div class="text-sm text-slate-500 line-clamp-2 mb-4" v-html="stripHtml(news.isi)"></div>
-                         <button class="mt-auto text-xs font-bold text-emerald-600 uppercase tracking-wider flex items-center gap-1 group/btn">
+                         <button @click="goToBerita(news.id)" class="mt-auto text-xs font-bold text-emerald-600 uppercase tracking-wider flex items-center gap-1 group/btn">
                            Baca Selengkapnya 
                            <ArrowRight class="w-3 h-3 group-hover/btn:translate-x-1 transition-transform"/>
                          </button>
@@ -289,8 +289,8 @@ import {
   FileText, Megaphone, LayoutGrid, Pin, Calendar
 } from 'lucide-vue-next';
 import { fetchSupabase } from '@/service/api.js';
-import router from '@/router';
 
+const router = useRouter(); // Pastikan menggunakan router dari hook
 const desaInfo = ref(null);
 const statistikInfo = ref(null);
 const isLoading = ref(true);
@@ -298,6 +298,7 @@ const isLoading = ref(true);
 const pinnedNews = ref([]);
 const agendaList = ref([]);
 const latestNews = ref([]);
+
 const go = (page, category = null) => {
   if (category) {
     router.push({ name: page, query: { filter: category } });
@@ -306,13 +307,15 @@ const go = (page, category = null) => {
   }
 };
 
-// Computed untuk mengolah cover_path dari database (string dipisah koma)
+// Fungsi navigasi khusus berita per page
+const goToBerita = (uuid) => {
+  router.push(`berita/beritaperpage?id=${uuid}`);
+};
+
 const coverList = computed(() => {
   if (desaInfo.value?.cover_desa_path) {
-    // Pecah berdasarkan koma, lalu bersihkan spasi
     return desaInfo.value.cover_desa_path.split(',').map(item => item.trim());
   }
-  // Fallback default
   return ['https://images.unsplash.com/photo-1500382017468-9049fed747ef?q=80&w=2832&auto=format&fit=crop'];
 });
 
@@ -341,10 +344,10 @@ const stats = ref([
 ]);
 
 const highlights = [
-  { title: 'Profil & Visi Misi', description: 'Kenali sejarah, visi, misi, serta struktur pemerintahan desa yang melayani Anda.', action: 'profile', icon: FileText },
-  { title: 'Transparansi Desa', description: 'Akses laporan APBDes, realisasi anggaran, dan dokumentasi pembangunan secara terbuka.', action: 'transparansi', icon: TrendingUp },
-  { title: 'Layanan Mandiri', description: 'Urus surat pengantar, SKCK, dan administrasi kependudukan dari rumah secara online.', action: 'services', icon: LayoutGrid },
-  { title: 'Potensi & UMKM', description: 'Galeri produk unggulan desa, pariwisata, dan potensi ekonomi kreatif warga.', action: 'potensi', icon: Megaphone },
+  { title: 'Profil & Visi Misi', description: 'Kenali sejarah, visi, misi, serta struktur pemerintahan desa yang melayani Anda.', action: '/profile', icon: FileText },
+  { title: 'Transparansi Desa', description: 'Akses laporan APBDes, realisasi anggaran, dan dokumentasi pembangunan secara terbuka.', action: '/transparansi', icon: TrendingUp },
+  { title: 'Layanan Mandiri', description: 'Urus surat pengantar, SKCK, dan administrasi kependudukan dari rumah secara online.', action: '/services', icon: LayoutGrid },
+  { title: 'Potensi & UMKM', description: 'Galeri produk unggulan desa, pariwisata, dan potensi ekonomi kreatif warga.', action: '/potensi', icon: Megaphone },
 ];
 
 const loadDashboardData = async () => {
@@ -409,7 +412,6 @@ onMounted(() => {
 <style scoped>
 @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800&display=swap');
 
-/* Slow Zoom Effect Background */
 .animate-slow-zoom {
   animation: slowZoom 20s infinite alternate linear;
 }
@@ -418,7 +420,6 @@ onMounted(() => {
   to { transform: scale(1.15); }
 }
 
-/* Base Animations */
 .animate-fade-in-up {
   animation: fadeInUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
   opacity: 0;

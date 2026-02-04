@@ -3,20 +3,60 @@
     <div class="bg-emerald-950 text-white/90 py-2 text-[10px] md:text-xs border-b border-white/10">
       <div class="container mx-auto px-4 flex justify-between items-center">
         <div class="flex items-center gap-3 md:gap-5">
-          <div class="flex items-center gap-1.5">
-            <Phone class="h-3 w-3 md:h-4 md:w-4 text-emerald-400"/>
+          <a 
+            :href="desaInfo?.nomor_desa ? `https://wa.me/${desaInfo.nomor_desa.replace(/\D/g,'')}` : '#'" 
+            target="_blank"
+            class="flex items-center gap-1.5 hover:text-emerald-400 transition"
+          >
+            <svg class="h-3 w-3 md:h-4 md:w-4 fill-emerald-400" viewBox="0 0 24 24">
+              <path :d="mdiWhatsapp" />
+            </svg>
             <span class="hidden xs:inline">{{ desaInfo?.nomor_desa || '+62 000-0000' }}</span>
             <span class="xs:hidden">Kontak</span>
-          </div>
-          <div class="flex items-center gap-1.5">
-            <Mail class="h-3 w-3 md:h-4 md:w-4 text-emerald-400"/>
+          </a>
+          <a 
+            :href="desaInfo?.email_desa ? `mailto:${desaInfo.email_desa}` : '#'"
+            class="flex items-center gap-1.5 hover:text-emerald-400 transition"
+          >
+            <svg class="h-3 w-3 md:h-4 md:w-4 fill-emerald-400" viewBox="0 0 24 24">
+              <path :d="mdiEmail" />
+            </svg>
             <span class="hidden sm:inline">{{ desaInfo?.email_desa || 'kontak@desa.id' }}</span>
             <span class="sm:hidden text-[9px]">Email</span>
-          </div>
+          </a>
         </div>
+        
         <div class="flex items-center gap-4">
-          <a href="#" class="hover:text-emerald-400 transition"><FacebookIcon class="w-3.5 h-3.5 md:w-4 md:h-4"/></a>
-          <a href="#" class="hover:text-emerald-400 transition"><InstagramIcon class="w-3.5 h-3.5 md:w-4 md:h-4"/></a>
+          <a 
+  :href="desaInfo?.facebook_url || '#'"
+  target="_blank"
+  class="hover:text-emerald-400 transition"
+>
+
+            <svg class="w-3.5 h-3.5 md:w-4 md:h-4 fill-current" viewBox="0 0 24 24">
+              <path :d="mdiFacebook" />
+            </svg>
+          </a>
+          <a 
+  :href="desaInfo?.instagram_url || '#'"
+  target="_blank"
+  class="hover:text-emerald-400 transition"
+>
+
+            <svg class="w-3.5 h-3.5 md:w-4 md:h-4 fill-current" viewBox="0 0 24 24">
+              <path :d="mdiInstagram" />
+            </svg>
+          </a>
+          <a 
+  :href="desaInfo?.youtube_url || '#'"
+  target="_blank"
+  class="hover:text-emerald-400 transition"
+>
+
+            <svg class="w-3.5 h-3.5 md:w-4 md:h-4 fill-current" viewBox="0 0 24 24">
+              <path :d="mdiYoutube" />
+            </svg>
+          </a>
         </div>
       </div>
     </div>
@@ -39,7 +79,9 @@
           <router-link to="/" class="flex items-center gap-2 md:gap-4 group">
             <div class="logo-box p-1.5 md:p-2.5">
               <img v-if="desaInfo?.logo_desa_path" :src="desaInfo.logo_desa_path" class="h-6 w-6 md:h-8 md:w-8 object-contain"/>
-              <Home v-else class="h-6 w-6 md:h-8 md:w-8 text-white"/>
+              <svg v-else class="h-6 w-6 md:h-8 md:w-8 fill-white" viewBox="0 0 24 24">
+                <path :d="mdiHome" />
+              </svg>
             </div>
             <div class="flex flex-col">
               <div class="text-sm md:text-xl font-extrabold uppercase tracking-wide text-emerald-800 leading-none mb-1">
@@ -56,7 +98,9 @@
               <div v-if="item.name === 'Berita desa'" class="relative group">
                 <button class="nav-link flex items-center gap-1 group-hover:bg-emerald-50 group-hover:text-emerald-700">
                   {{ item.name }}
-                  <ChevronDown class="w-4 h-4 transition-transform group-hover:rotate-180" />
+                  <svg class="w-4 h-4 transition-transform group-hover:rotate-180 fill-current" viewBox="0 0 24 24">
+                    <path :d="mdiChevronDown" />
+                  </svg>
                 </button>
                 <div class="absolute top-full left-0 w-48 bg-white border border-emerald-50 shadow-xl rounded-xl py-2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 transform origin-top scale-95 group-hover:scale-100">
                   <button v-for="cat in categories" :key="cat" @click="go('berita', cat === 'semua' ? null : cat)"
@@ -73,8 +117,12 @@
           </div>
 
           <button @click="isMobileMenuOpen = !isMobileMenuOpen" class="lg:hidden p-2 rounded-lg bg-emerald-50 text-emerald-700">
-            <Menu v-if="!isMobileMenuOpen" class="w-6 h-6"/>
-            <X v-else class="w-6 h-6"/>
+            <svg v-if="!isMobileMenuOpen" class="w-6 h-6 fill-current" viewBox="0 0 24 24">
+              <path :d="mdiMenu" />
+            </svg>
+            <svg v-else class="w-6 h-6 fill-current" viewBox="0 0 24 24">
+              <path :d="mdiClose" />
+            </svg>
           </button>
         </div>
       </div>
@@ -88,16 +136,18 @@
                   class="flex items-center justify-between w-full px-4 py-3.5 mobile-link"
                   :class="{'text-emerald-700 bg-emerald-50': isBeritaOpen}">
                   <span class="flex items-center gap-2">Berita Desa</span>
-                  <ChevronDown class="w-4 h-4 transition-transform duration-300" :class="{'rotate-180': isBeritaOpen}" />
+                  <svg class="w-4 h-4 transition-transform duration-300 fill-current" :class="{'rotate-180': isBeritaOpen}" viewBox="0 0 24 24">
+                    <path :d="mdiChevronDown" />
+                  </svg>
                 </button>
                 
                 <transition name="expand">
                   <div v-if="isBeritaOpen" class="overflow-hidden bg-slate-50/50 rounded-xl ml-4 border-l-2 border-emerald-100">
                     <button v-for="cat in categories" :key="cat" 
-  @click="go('Berita Desa', cat)" 
-  class="w-full text-left px-4 py-2 text-sm font-medium text-slate-600 hover:bg-emerald-50 hover:text-emerald-700 transition-colors capitalize">
-  {{ cat }}
-</button>
+                      @click="go('Berita Desa', cat)" 
+                      class="w-full text-left px-4 py-2 text-sm font-medium text-slate-600 hover:bg-emerald-50 hover:text-emerald-700 transition-colors capitalize">
+                      {{ cat }}
+                    </button>
                   </div>
                 </transition>
               </div>
@@ -130,12 +180,19 @@ import { ref, onMounted } from 'vue'
 import Footer from '@/components/Footer.vue'
 import { useRouter } from 'vue-router'
 
-import {
-  Home, Menu, X, Phone, Mail, ChevronDown,
-  MapPin, Megaphone,
-  Facebook as FacebookIcon,
-  Instagram as InstagramIcon
-} from 'lucide-vue-next'
+// Import MDI Icons Path (Sangat ringan)
+import { 
+  mdiWhatsapp, 
+  mdiEmail, 
+  mdiFacebook, 
+  mdiInstagram, 
+  mdiYoutube, 
+  mdiHome, 
+  mdiMenu, 
+  mdiClose, 
+  mdiChevronDown 
+} from '@mdi/js'
+
 import { fetchSupabase } from '@/service/api.js'
 
 const router = useRouter()
@@ -148,7 +205,7 @@ const categories = ['Semua', 'Pengumuman', 'Pembangunan', 'Kegiatan', 'Layanan']
 const menuItems = [
   { name: 'Beranda', href: '/' },
   { name: 'Profil', href: '/profile' },
-  { name: 'Berita desa', href: '/berita' }, // Nama sudah diperbarui
+  { name: 'Berita desa', href: '/berita' },
   { name: 'Transparansi', href: '/transparansi' },
   { name: 'Potensi', href: '/potensi' },
   { name: 'Wilayah', href: '/lokasi' },
@@ -156,9 +213,7 @@ const menuItems = [
 ]
 
 const go = (page, category = null) => {
-  // Kita paksa agar page yang masuk adalah 'Berita Desa' jika tujuannya berita
   const routeName = page === 'berita' ? 'Berita Desa' : page;
-  
   if (category && category !== 'Semua') {
     router.push({ name: routeName, query: { filter: category.toLowerCase() } });
   } else {
@@ -179,82 +234,18 @@ onMounted(loadDesaInfo)
 </script>
 
 <style scoped>
-.expand-enter-active, .expand-leave-active {
-  transition: all 0.3s ease-in-out;
-  max-height: 300px;
-}
-.expand-enter-from, .expand-leave-to {
-  max-height: 0;
-  opacity: 0;
-}
-
-.logo-box {
-  background: #059669;
-  transition: .3s;
-  box-shadow: 0 6px 20px rgba(16,185,129,.4);
-  border-radius: 0.75rem;
-}
-
-.marquee-container {
-  overflow: hidden;
-  white-space: nowrap;
-  position: relative;
-}
-
-.marquee-content {
-  display: inline-flex;
-  gap: 4rem;
-  animation: marquee 26s linear infinite;
-}
-
-@keyframes marquee {
-  from { transform: translateX(0); }
-  to { transform: translateX(-50%); }
-}
-
-.nav-link {
-  padding: .55rem 1rem;
-  font-size: .875rem;
-  font-weight: 600;
-  color: #475569;
-  border-radius: .65rem;
-  transition: .25s;
-}
-
-.nav-link:hover, .nav-active {
-  background: #ecfdf5;
-  color: #047857;
-}
-
-.btn-transparansi {
-  margin-left: 1rem;
-  padding: .65rem 1.25rem;
-  background: #059669;
-  color: white;
-  font-size: .85rem;
-  font-weight: 700;
-  border-radius: 999px;
-  box-shadow: 0 6px 20px rgba(16,185,129,.4);
-}
-
-.mobile-link {
-  border-radius: .7rem;
-  font-weight: 600;
-  color: #334155;
-  transition: .2s;
-}
-
-.mobile-active {
-  background: #ecfdf5;
-  color: #047857;
-  padding-left: 1.5rem !important; 
-}
-
-.slide-enter-active, .slide-leave-active {
-  transition: .35s cubic-bezier(.4, 0, .2, 1);
-}
-.slide-enter-from, .slide-leave-to {
-  transform: translateY(-10px);
-  opacity: 0;
-}
+/* Style tetap sama */
+.expand-enter-active, .expand-leave-active { transition: all 0.3s ease-in-out; max-height: 300px; }
+.expand-enter-from, .expand-leave-to { max-height: 0; opacity: 0; }
+.logo-box { background: #059669; transition: .3s; box-shadow: 0 6px 20px rgba(16,185,129,.4); border-radius: 0.75rem; }
+.marquee-container { overflow: hidden; white-space: nowrap; position: relative; }
+.marquee-content { display: inline-flex; gap: 4rem; animation: marquee 26s linear infinite; }
+@keyframes marquee { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+.nav-link { padding: .55rem 1rem; font-size: .875rem; font-weight: 600; color: #475569; border-radius: .65rem; transition: .25s; }
+.nav-link:hover, .nav-active { background: #ecfdf5; color: #047857; }
+.btn-transparansi { margin-left: 1rem; padding: .65rem 1.25rem; background: #059669; color: white; font-size: .85rem; font-weight: 700; border-radius: 999px; box-shadow: 0 6px 20px rgba(16,185,129,.4); }
+.mobile-link { border-radius: .7rem; font-weight: 600; color: #334155; transition: .2s; }
+.mobile-active { background: #ecfdf5; color: #047857; padding-left: 1.5rem !important; }
+.slide-enter-active, .slide-leave-active { transition: .35s cubic-bezier(.4, 0, .2, 1); }
+.slide-enter-from, .slide-leave-to { transform: translateY(-10px); opacity: 0; }
 </style>
