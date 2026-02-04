@@ -27,32 +27,17 @@
         </div>
         
         <div class="flex items-center gap-4">
-          <a 
-  :href="desaInfo?.facebook_url || '#'"
-  target="_blank"
-  class="hover:text-emerald-400 transition"
->
-
+          <a :href="desaInfo?.facebook_url || '#'" target="_blank" class="hover:text-emerald-400 transition">
             <svg class="w-3.5 h-3.5 md:w-4 md:h-4 fill-current" viewBox="0 0 24 24">
               <path :d="mdiFacebook" />
             </svg>
           </a>
-          <a 
-  :href="desaInfo?.instagram_url || '#'"
-  target="_blank"
-  class="hover:text-emerald-400 transition"
->
-
+          <a :href="desaInfo?.instagram_url || '#'" target="_blank" class="hover:text-emerald-400 transition">
             <svg class="w-3.5 h-3.5 md:w-4 md:h-4 fill-current" viewBox="0 0 24 24">
               <path :d="mdiInstagram" />
             </svg>
           </a>
-          <a 
-  :href="desaInfo?.youtube_url || '#'"
-  target="_blank"
-  class="hover:text-emerald-400 transition"
->
-
+          <a :href="desaInfo?.youtube_url || '#'" target="_blank" class="hover:text-emerald-400 transition">
             <svg class="w-3.5 h-3.5 md:w-4 md:h-4 fill-current" viewBox="0 0 24 24">
               <path :d="mdiYoutube" />
             </svg>
@@ -76,18 +61,22 @@
     <nav class="sticky top-0 z-[60] bg-white/95 backdrop-blur-xl shadow-sm border-b border-emerald-100">
       <div class="container mx-auto px-4">
         <div class="flex justify-between items-center h-16 md:h-20">
-          <router-link to="/" class="flex items-center gap-2 md:gap-4 group">
-            <div class="logo-box p-1.5 md:p-2.5">
-              <img v-if="desaInfo?.logo_desa_path" :src="desaInfo.logo_desa_path" class="h-6 w-6 md:h-8 md:w-8 object-contain"/>
-              <svg v-else class="h-6 w-6 md:h-8 md:w-8 fill-white" viewBox="0 0 24 24">
+          
+          <router-link to="/" class="flex items-center gap-3 md:gap-4 group">
+            <div class="relative flex items-center justify-center w-12 h-12 md:w-16 md:h-16 transition-transform duration-500 group-hover:scale-110">
+              <img v-if="desaInfo?.logo_desa_path" :src="desaInfo.logo_desa_path" class="h-full w-full object-contain drop-shadow-md"/>
+              <svg v-else class="h-8 w-8 md:h-10 md:w-10 fill-emerald-600" viewBox="0 0 24 24">
                 <path :d="mdiHome" />
               </svg>
             </div>
-            <div class="flex flex-col">
-              <div class="text-sm md:text-xl font-extrabold uppercase tracking-wide text-emerald-800 leading-none mb-1">
-                {{ desaInfo?.nama_desa || 'DESA' }}
+            
+            <div class="flex flex-col border-l-2 border-emerald-100 pl-3 md:pl-4">
+              <div class="flex items-center">
+                <div ref="brandName" class="text-sm md:text-xl font-extrabold uppercase tracking-tight text-emerald-900 leading-none min-h-[1em]">
+                  </div>
+                <span class="cursor-blinker bg-emerald-500 w-[2px] h-4 md:h-5 ml-1"></span>
               </div>
-              <div class="text-[8px] md:text-[10px] font-bold tracking-widest text-emerald-500 leading-none">
+              <div ref="brandSub" class="text-[8px] md:text-[10px] font-bold tracking-[0.2em] text-emerald-600 leading-none uppercase mt-1 opacity-0">
                 KABUPATEN PURWOREJO
               </div>
             </div>
@@ -103,7 +92,7 @@
                   </svg>
                 </button>
                 <div class="absolute top-full left-0 w-48 bg-white border border-emerald-50 shadow-xl rounded-xl py-2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 transform origin-top scale-95 group-hover:scale-100">
-                  <button v-for="cat in categories" :key="cat" @click="go('berita', cat === 'semua' ? null : cat)"
+                  <button v-for="cat in categories" :key="cat" @click="go('berita', cat === 'Semua' ? null : cat)"
                     class="w-full text-left px-4 py-2 text-sm font-medium text-slate-600 hover:bg-emerald-50 hover:text-emerald-700 transition-colors capitalize">
                     {{ cat }}
                   </button>
@@ -140,23 +129,20 @@
                     <path :d="mdiChevronDown" />
                   </svg>
                 </button>
-                
                 <transition name="expand">
                   <div v-if="isBeritaOpen" class="overflow-hidden bg-slate-50/50 rounded-xl ml-4 border-l-2 border-emerald-100">
                     <button v-for="cat in categories" :key="cat" 
-                      @click="go('Berita Desa', cat)" 
+                      @click="go('berita', cat)" 
                       class="w-full text-left px-4 py-2 text-sm font-medium text-slate-600 hover:bg-emerald-50 hover:text-emerald-700 transition-colors capitalize">
                       {{ cat }}
                     </button>
                   </div>
                 </transition>
               </div>
-
               <router-link v-else :to="item.href" @click="isMobileMenuOpen = false" class="flex items-center w-full px-4 py-3.5 mobile-link" active-class="mobile-active">
                 {{ item.name }}
               </router-link>
             </template>
-
             <div class="pt-4 px-4 pb-2">
               <a :href="desaInfo?.link_transparansi || '#'" target="_blank" class="block w-full text-center py-3.5 rounded-xl bg-emerald-600 text-white font-bold shadow-lg">
                 Transparansi Dana
@@ -179,18 +165,15 @@
 import { ref, onMounted } from 'vue'
 import Footer from '@/components/Footer.vue'
 import { useRouter } from 'vue-router'
+import gsap from 'gsap'
+import { TextPlugin } from 'gsap/TextPlugin'
 
-// Import MDI Icons Path (Sangat ringan)
+// Daftarkan plugin GSAP
+gsap.registerPlugin(TextPlugin)
+
 import { 
-  mdiWhatsapp, 
-  mdiEmail, 
-  mdiFacebook, 
-  mdiInstagram, 
-  mdiYoutube, 
-  mdiHome, 
-  mdiMenu, 
-  mdiClose, 
-  mdiChevronDown 
+  mdiWhatsapp, mdiEmail, mdiFacebook, mdiInstagram, 
+  mdiYoutube, mdiHome, mdiMenu, mdiClose, mdiChevronDown 
 } from '@mdi/js'
 
 import { fetchSupabase } from '@/service/api.js'
@@ -200,8 +183,10 @@ const isMobileMenuOpen = ref(false)
 const isBeritaOpen = ref(false) 
 const desaInfo = ref(null)
 
-const categories = ['Semua', 'Pengumuman', 'Pembangunan', 'Kegiatan', 'Layanan'];
+const brandName = ref(null)
+const brandSub = ref(null)
 
+const categories = ['Semua', 'Pengumuman', 'Pembangunan', 'Kegiatan', 'Layanan'];
 const menuItems = [
   { name: 'Beranda', href: '/' },
   { name: 'Profil', href: '/profile' },
@@ -221,31 +206,82 @@ const go = (page, category = null) => {
   }
 };
 
+const initAnimations = () => {
+  const targetName = desaInfo.value?.nama_desa || 'DESA SIDOMUKTI';
+  
+  // 1. Animasi Typing Loop
+  gsap.to(brandName.value, {
+    duration: 2.5,
+    text: targetName,
+    ease: "power1.inOut",
+    repeat: -1,         // Loop selamanya
+    yoyo: true,         // Mengetik lalu menghapus kembali
+    repeatDelay: 2,     // Jeda saat teks sudah lengkap
+    holdDelay: 1        // Jeda saat teks kosong
+  });
+
+  // 2. Animasi Fade In Sub-head (Hanya sekali)
+  gsap.to(brandSub.value, {
+    opacity: 1,
+    y: 0,
+    duration: 1,
+    delay: 0.5,
+    ease: "power2.out"
+  });
+
+  // 3. Animasi Kursor Berkedip
+  gsap.to(".cursor-blinker", {
+    opacity: 0,
+    ease: "power2.inOut",
+    repeat: -1,
+    duration: 0.6
+  });
+}
+
 const loadDesaInfo = async () => {
   try {
     const { data } = await fetchSupabase('desa', 'select=*&limit=1')
-    if (data?.length) desaInfo.value = data[0]
+    if (data?.length) {
+      desaInfo.value = data[0]
+      setTimeout(() => initAnimations(), 300)
+    }
   } catch (error) {
     console.error("Error fetching data:", error)
   }
 }
 
-onMounted(loadDesaInfo)
+onMounted(() => {
+  loadDesaInfo()
+})
 </script>
 
 <style scoped>
-/* Style tetap sama */
+/* Transisi Menu Berita */
 .expand-enter-active, .expand-leave-active { transition: all 0.3s ease-in-out; max-height: 300px; }
 .expand-enter-from, .expand-leave-to { max-height: 0; opacity: 0; }
-.logo-box { background: #059669; transition: .3s; box-shadow: 0 6px 20px rgba(16,185,129,.4); border-radius: 0.75rem; }
+
+/* Marquee */
 .marquee-container { overflow: hidden; white-space: nowrap; position: relative; }
 .marquee-content { display: inline-flex; gap: 4rem; animation: marquee 26s linear infinite; }
 @keyframes marquee { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+
+/* Nav Links */
 .nav-link { padding: .55rem 1rem; font-size: .875rem; font-weight: 600; color: #475569; border-radius: .65rem; transition: .25s; }
 .nav-link:hover, .nav-active { background: #ecfdf5; color: #047857; }
-.btn-transparansi { margin-left: 1rem; padding: .65rem 1.25rem; background: #059669; color: white; font-size: .85rem; font-weight: 700; border-radius: 999px; box-shadow: 0 6px 20px rgba(16,185,129,.4); }
+
+/* Button Transparansi */
+.btn-transparansi { margin-left: 1rem; padding: .65rem 1.25rem; background: #059669; color: white; font-size: .85rem; font-weight: 700; border-radius: 999px; box-shadow: 0 6px 20px rgba(16,185,129,.4); transition: .3s; }
+.btn-transparansi:hover { background: #047857; transform: translateY(-2px); }
+
+/* Mobile Menu */
 .mobile-link { border-radius: .7rem; font-weight: 600; color: #334155; transition: .2s; }
 .mobile-active { background: #ecfdf5; color: #047857; padding-left: 1.5rem !important; }
+
 .slide-enter-active, .slide-leave-active { transition: .35s cubic-bezier(.4, 0, .2, 1); }
 .slide-enter-from, .slide-leave-to { transform: translateY(-10px); opacity: 0; }
+
+/* Custom Cursor */
+.cursor-blinker {
+  display: inline-block;
+}
 </style>

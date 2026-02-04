@@ -9,6 +9,7 @@ import PotensiDesaview from '@/views/PotensiDesaview.vue'
 import GaleriDesaView from '@/views/GaleriDesaView.vue'
 import AgendaDesa from '@/views/AgendaDesa.vue'
 import BeritaPerPage from '@/views/BeritaPerPage.vue'
+import ErrorPage from '@/views/ErrorPage.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -67,6 +68,11 @@ const router = createRouter({
         }
       ]
     },
+    {
+      path: '/:pathMatch(.*)*',
+      name: 'NotFound',
+      component: ErrorPage
+    }
   ],
 })
 
