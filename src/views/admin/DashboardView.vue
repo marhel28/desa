@@ -267,7 +267,7 @@ onMounted(() => {
             <p class="text-sm">Tidak ada agenda mendatang.</p>
           </div>
           
-          <router-link to="`/agenda-admin`" class="block w-full mt-4 py-2 text-center text-sm text-green-600 border border-green-600 rounded hover:bg-green-50 transition">
+          <router-link to="/agenda-admin" class="block w-full mt-4 py-2 text-center text-sm text-green-600 border border-green-600 rounded hover:bg-green-50 transition">
             Lihat Semua Agenda
           </router-link>
         </div>
