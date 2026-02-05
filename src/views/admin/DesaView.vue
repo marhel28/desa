@@ -43,7 +43,7 @@ const form = reactive({ ...defaultState });
 const fetchProfilDesa = async () => {
   isLoading.value = true;
   try {
-    const response = await api.get('/desa');
+    const response = await api.get('/desa/');
     if (response.data) {
       const data = response.data;
       // Konversi string "url1,url2" dari DB menjadi Array untuk UI
