@@ -1,2 +1,6 @@
 @import "tailwindcss";
 
+.label-pro { @apply block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2; }
+ .input-pro { @apply w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold focus:bg-white focus:border-emerald-500 outline-none transition-all; }
+ .status-pill { @apply flex-1 py-2 rounded-xl border-2 border-slate-100 text-[9px] font-black uppercase flex items-center justify-center cursor-pointer transition-all grayscale opacity-50 bg-white; }
+ .status-pill.active { @apply border-emerald-500 bg-emerald-50 grayscale-0 opacity-100 text-emerald-700; }
