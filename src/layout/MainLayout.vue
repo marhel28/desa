@@ -1,7 +1,7 @@
 <script setup>
 import { ref } from 'vue';
-import Sidebar from '@/components/Sidebar.vue';
-import Navbar from '@/components/Navbar.vue';
+import Sidebar from '@/components/SideBar.vue';
+import Navbar from '@/components/NavBar.vue';
 
 const isSidebarOpen = ref(false);
 
