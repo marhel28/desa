@@ -35,10 +35,10 @@ const fetchDashboardData = async () => {
   try {
     // Panggil semua API secara paralel (Promise.allSettled agar jika satu gagal, yang lain tetap jalan)
     const [resStatistik, resBerita, resAgenda, resPotensi] = await Promise.allSettled([
-      api.get('/statistik'), // Mengambil data statistik
-      api.get('/berita'),    // Mengambil data berita
-      api.get('/agenda'),    // Mengambil data agenda
-      api.get('/potensi')    // Mengambil data potensi
+      api.get('/statistik/'), // Mengambil data statistik
+      api.get('/berita/'),    // Mengambil data berita
+      api.get('/agenda/'),    // Mengambil data agenda
+      api.get('/potensi/')    // Mengambil data potensi
     ]);
 
     // 1. OLAH DATA STATISTIK & PROFESI
