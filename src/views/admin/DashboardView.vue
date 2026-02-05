@@ -267,8 +267,7 @@ onMounted(() => {
             <p class="text-sm">Tidak ada agenda mendatang.</p>
           </div>
           
-          <router-link to="/agenda-admin
-          " class="block w-full mt-4 py-2 text-center text-sm text-green-600 border border-green-600 rounded hover:bg-green-50 transition">
+          <router-link to="`/agenda-admin`" class="block w-full mt-4 py-2 text-center text-sm text-green-600 border border-green-600 rounded hover:bg-green-50 transition">
             Lihat Semua Agenda
           </router-link>
         </div>
@@ -277,7 +276,7 @@ onMounted(() => {
       <div class="bg-white rounded-lg shadow overflow-hidden">
         <div class="px-6 py-4 border-b border-gray-100 flex justify-between items-center">
           <h3 class="text-lg font-bold text-gray-800">Berita Terbaru</h3>
-          <router-link to="/berita-admin" class="text-sm text-blue-600 hover:text-blue-800 font-medium">Kelola Berita &rarr;</router-link>
+          <router-link to="`/berita-admin`" class="text-sm text-blue-600 hover:text-blue-800 font-medium">Kelola Berita &rarr;</router-link>
         </div>
         <div class="overflow-x-auto">
           <table class="w-full text-sm text-left">
