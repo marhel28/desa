@@ -1,7 +1,8 @@
 <script setup>
 import { computed } from 'vue';
-import { useAuthStore } from '@/stores/auth'; // Menggunakan store yang dibuat sebelumnya
+import { useAuthStore } from '@/stores/auth';
 import { useRouter } from 'vue-router';
+import Swal from 'sweetalert2'; // Import SweetAlert2
 
 const authStore = useAuthStore();
 const router = useRouter();
@@ -14,9 +15,30 @@ const userEmail = computed(() => authStore.user?.email || 'Admin');
 const userName = computed(() => userEmail.value.split('@')[0]);
 
 const handleLogout = () => {
-  if(confirm('Apakah Anda yakin ingin keluar?')) {
-    authStore.logout();
-  }
+  Swal.fire({
+    title: 'Apakah Anda yakin?',
+    text: "Sesi Anda akan segera berakhir!",
+    icon: 'warning',
+    showCancelButton: true,
+    confirmButtonColor: '#10B981', // Warna hijau (sesuai tema button kamu)
+    cancelButtonColor: '#EF4444',  // Warna merah
+    confirmButtonText: 'Ya, Logout!',
+    cancelButtonText: 'Batal',
+    reverseButtons: true
+  }).then((result) => {
+    if (result.isConfirmed) {
+      authStore.logout();
+      
+      // Opsional: Tampilkan toast sukses sebelum pindah halaman
+      Swal.fire({
+        title: 'Berhasil!',
+        text: 'Anda telah keluar.',
+        icon: 'success',
+        timer: 1500,
+        showConfirmButton: false
+      });
+    }
+  });
 };
 </script>
 
