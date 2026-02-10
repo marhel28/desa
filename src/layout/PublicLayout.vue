@@ -102,7 +102,7 @@
                 {{ item.name }}
               </router-link>
             </template>
-            <a :href="desaInfo?.link_transparansi || '/dashboard'" target="_blank" class="btn-transparansi">Panel Admin</a>
+            <a :href="desaInfo?.link_transparansi || '/dashboard'" target="_blank" class="btn-transparansi">Login</a>
           </div>
 
           <button @click="isMobileMenuOpen = !isMobileMenuOpen" class="lg:hidden p-2 rounded-lg bg-emerald-50 text-emerald-700">
