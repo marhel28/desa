@@ -311,6 +311,7 @@
 </template>
 
 <script setup>
+import { useRoute } from 'vue-router'
 
 import { ref, onMounted, nextTick, computed, defineComponent, h } from 'vue';
 import { History, Target, Users, Quote, BarChart2, Briefcase, ArrowUp, ArrowDown, ArrowRight, ArrowLeft } from 'lucide-vue-next';
