@@ -286,6 +286,42 @@
 
 <script setup>
 import { ref, computed, onMounted } from 'vue';
+import { watch, computed } from 'vue'
+import { useHead } from '@vueuse/head'
+const seoTitle = computed(() => {
+  return profilDesa.value?.nama_desa
+    ? `Potensi Unggulan ${profilDesa.value.nama_desa} – Kecamatan Bener Kabupaten Purworejo`
+    : 'Potensi Unggulan Desa Sidomukti – Kecamatan Bener Kabupaten Purworejo'
+})
+
+const seoDescription = computed(() => {
+  return profilDesa.value?.deskripsi
+    || 'Informasi potensi unggulan Desa Sidomukti meliputi wisata, UMKM, pertanian, peternakan, perikanan, dan kelembagaan desa.'
+})
+
+useHead({
+  title: seoTitle,
+  meta: [
+    {
+      name: 'description',
+      content: seoDescription
+    },
+    {
+      property: 'og:title',
+      content: seoTitle
+    },
+    {
+      property: 'og:description',
+      content: seoDescription
+    },
+    {
+      property: 'og:type',
+      content: 'website'
+    }
+  ]
+})
+
+
 import { 
   LayoutGrid, Mountain, Palette, Sprout, 
   Fish, Users, MoreHorizontal, Store, MapPin, 
