@@ -218,7 +218,7 @@ onMounted(() => {
         <div class="lg:col-span-2 bg-white rounded-lg shadow p-6">
           <div class="flex justify-between items-center mb-6">
             <h3 class="text-lg font-bold text-gray-800">Demografi Profesi Penduduk</h3>
-            <router-link to="/statistik" class="text-sm text-blue-600 hover:underline flex items-center gap-1">
+            <router-link to="/statistik-admin" class="text-sm text-blue-600 hover:underline flex items-center gap-1">
               Lihat Detail <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
             </router-link>
           </div>
