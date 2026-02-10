@@ -311,6 +311,8 @@
 </template>
 
 <script setup>
+import { useHead } from '@vueuse/head'
+
 import { ref, onMounted, nextTick, computed, defineComponent, h } from 'vue';
 import { History, Target, Users, Quote, BarChart2, Briefcase, ArrowUp, ArrowDown, ArrowRight, ArrowLeft } from 'lucide-vue-next';
 import { fetchSupabase } from '@/service/api.js';
@@ -358,6 +360,62 @@ const activeTab = ref('sejarah');
 const isLoading = ref(true);
 const desaInfo = ref(null);
 const statInfo = ref(null);
+const route = useRoute()
+
+useHead({
+  title: () => {
+    if (activeTab.value === 'sejarah') {
+      return `Profil Desa ${desaInfo.value?.nama_desa || 'Sidomukti'} – Sejarah & Sambutan`
+    }
+    if (activeTab.value === 'visi-misi') {
+      return `Visi dan Misi Desa ${desaInfo.value?.nama_desa || 'Sidomukti'}`
+    }
+    if (activeTab.value === 'demografi') {
+      return `Demografi Desa ${desaInfo.value?.nama_desa || 'Sidomukti'}`
+    }
+    if (activeTab.value === 'struktur') {
+      return `Struktur Pemerintahan Desa ${desaInfo.value?.nama_desa || 'Sidomukti'}`
+    }
+    return `Profil Desa ${desaInfo.value?.nama_desa || 'Sidomukti'}`
+  },
+
+  meta: [
+    {
+      name: 'description',
+      content: () => {
+        if (activeTab.value === 'sejarah') {
+          return `Profil dan sejarah Desa ${desaInfo.value?.nama_desa || 'Sidomukti'} Kecamatan Bener Kabupaten Purworejo.`
+        }
+        if (activeTab.value === 'visi-misi') {
+          return `Visi dan misi pembangunan Desa ${desaInfo.value?.nama_desa || 'Sidomukti'} periode 2024–2029.`
+        }
+        if (activeTab.value === 'demografi') {
+          return `Data demografi dan wilayah Desa ${desaInfo.value?.nama_desa || 'Sidomukti'} Kecamatan Bener.`
+        }
+        if (activeTab.value === 'struktur') {
+          return `Struktur organisasi dan perangkat Desa ${desaInfo.value?.nama_desa || 'Sidomukti'}.`
+        }
+        return `Profil resmi Desa ${desaInfo.value?.nama_desa || 'Sidomukti'} Kecamatan Bener Kabupaten Purworejo.`
+      }
+    },
+
+    // Open Graph (buat share WA / FB)
+    {
+      property: 'og:title',
+      content: () =>
+        `Profil Desa ${desaInfo.value?.nama_desa || 'Sidomukti'}`
+    },
+    {
+      property: 'og:description',
+      content: () =>
+        `Website resmi Desa ${desaInfo.value?.nama_desa || 'Sidomukti'} Kecamatan Bener Kabupaten Purworejo.`
+    },
+    {
+      property: 'og:type',
+      content: 'website'
+    }
+  ]
+})
 
 const tabs = [
   { id: 'sejarah', label: 'Sejarah & Sambutan', icon: History },

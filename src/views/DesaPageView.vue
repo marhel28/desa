@@ -224,6 +224,47 @@
 </template>
 
 <script setup>
+import { useHead } from '@vueuse/head'
+
+useHead({
+  title: () => {
+    if (route.query.filter && route.query.filter !== 'Semua') {
+      return `Berita ${route.query.filter} Desa Sidomukti – Kecamatan Bener`
+    }
+    return 'Berita Desa Sidomukti – Kecamatan Bener Kabupaten Purworejo'
+  },
+
+  meta: [
+    {
+      name: 'description',
+      content: () => {
+        if (route.query.filter && route.query.filter !== 'Semua') {
+          return `Kumpulan berita kategori ${route.query.filter} Desa Sidomukti Kecamatan Bener Kabupaten Purworejo.`
+        }
+        return 'Berita dan informasi resmi Desa Sidomukti Kecamatan Bener Kabupaten Purworejo meliputi kegiatan, pengumuman, pembangunan, dan layanan desa.'
+      }
+    },
+    {
+      property: 'og:title',
+      content: () => {
+        if (route.query.filter && route.query.filter !== 'Semua') {
+          return `Berita ${route.query.filter} – Desa Sidomukti`
+        }
+        return 'Berita Desa Sidomukti'
+      }
+    },
+    {
+      property: 'og:description',
+      content: () =>
+        'Portal berita resmi Desa Sidomukti Kecamatan Bener Kabupaten Purworejo.'
+    },
+    {
+      property: 'og:type',
+      content: 'website'
+    }
+  ]
+})
+
 import { ref, computed, onMounted, watch } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
 import berita from "@/assets/berita-image.jpeg"

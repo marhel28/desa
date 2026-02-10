@@ -128,6 +128,7 @@
 </template>
 
 <script setup>
+import { useHead } from '@vueuse/head'
 import { ref, onMounted, computed, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import {
@@ -143,6 +144,53 @@ const router = useRouter();
 const news = ref(null);
 const relatedNews = ref([]);
 const isLoading = ref(true);
+
+useHead({
+  title: () => {
+    if (!news.value) {
+      return 'Berita Desa Sidomukti'
+    }
+    return `${news.value.title} – Desa Sidomukti Kecamatan Bener`
+  },
+
+  meta: [
+    {
+      name: 'description',
+      content: () => {
+        if (!news.value?.isi) {
+          return 'Berita dan informasi resmi Desa Sidomukti Kecamatan Bener Kabupaten Purworejo.'
+        }
+        const text = news.value.isi.replace(/<[^>]*>?/gm, '').slice(0, 160)
+        return text
+      }
+    },
+
+    // Open Graph (WA / FB / Telegram)
+    {
+      property: 'og:title',
+      content: () =>
+        news.value
+          ? `${news.value.title} – Desa Sidomukti`
+          : 'Berita Desa Sidomukti'
+    },
+    {
+      property: 'og:description',
+      content: () =>
+        news.value
+          ? news.value.isi.replace(/<[^>]*>?/gm, '').slice(0, 160)
+          : 'Portal berita resmi Desa Sidomukti Kecamatan Bener Kabupaten Purworejo.'
+    },
+    {
+      property: 'og:image',
+      content: () =>
+        news.value ? getImageUrl(news.value) : ''
+    },
+    {
+      property: 'og:type',
+      content: 'article'
+    }
+  ]
+})
 
 // --- HELPERS ---
 const formatDate = (dateString) => {

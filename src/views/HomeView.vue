@@ -285,6 +285,7 @@
 </template>
 
 <script setup>
+import { useHead } from '@vueuse/head'
 import VidioCard from '@/components/VidioCard.vue';
 import BubbleUp from '@/components/BubbleUp.vue';
 
@@ -294,6 +295,42 @@ import { Swiper, SwiperSlide } from 'swiper/vue';
 import { Autoplay as SwiperAutoplay, EffectFade as SwiperEffectFade } from 'swiper/modules';
 import 'swiper/css';
 import 'swiper/css/effect-fade';
+
+useHead({
+  title: () =>
+    desaInfo.value?.nama_desa
+      ? `${desaInfo.value.nama_desa} – Kecamatan Bener Kabupaten Purworejo`
+      : 'Desa Sidomukti – Kecamatan Bener Kabupaten Purworejo',
+
+  meta: [
+    {
+      name: 'description',
+      content: () =>
+        desaInfo.value?.visi
+          ? desaInfo.value.visi
+          : 'Website resmi Desa Sidomukti Kecamatan Bener Kabupaten Purworejo. Informasi profil desa, berita, potensi, transparansi, dan layanan masyarakat.'
+    },
+    {
+      property: 'og:title',
+      content: () =>
+        desaInfo.value?.nama_desa
+          ? `${desaInfo.value.nama_desa} – Website Resmi`
+          : 'Desa Sidomukti'
+    },
+    {
+      property: 'og:description',
+      content: () =>
+        desaInfo.value?.visi
+          ? desaInfo.value.visi
+          : 'Portal resmi Desa Sidomukti Kecamatan Bener Kabupaten Purworejo.'
+    },
+    {
+      property: 'og:type',
+      content: 'website'
+    }
+  ]
+})
+
 
 // IMPORT KOMPONEN MAPS
 import Maps from '@/components/Maps.vue';
