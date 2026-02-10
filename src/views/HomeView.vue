@@ -296,40 +296,6 @@ import { Autoplay as SwiperAutoplay, EffectFade as SwiperEffectFade } from 'swip
 import 'swiper/css';
 import 'swiper/css/effect-fade';
 
-useHead({
-  title: () =>
-    desaInfo.value?.nama_desa
-      ? `${desaInfo.value.nama_desa} – Kecamatan Bener Kabupaten Purworejo`
-      : 'Desa Sidomukti – Kecamatan Bener Kabupaten Purworejo',
-
-  meta: [
-    {
-      name: 'description',
-      content: () =>
-        desaInfo.value?.visi
-          ? desaInfo.value.visi
-          : 'Website resmi Desa Sidomukti Kecamatan Bener Kabupaten Purworejo. Informasi profil desa, berita, potensi, transparansi, dan layanan masyarakat.'
-    },
-    {
-      property: 'og:title',
-      content: () =>
-        desaInfo.value?.nama_desa
-          ? `${desaInfo.value.nama_desa} – Website Resmi`
-          : 'Desa Sidomukti'
-    },
-    {
-      property: 'og:description',
-      content: () =>
-        desaInfo.value?.visi
-          ? desaInfo.value.visi
-          : 'Portal resmi Desa Sidomukti Kecamatan Bener Kabupaten Purworejo.'
-    },
-    {
-      property: 'og:type',
-      content: 'website'
-    }
-  ]
-})
 
 
 // IMPORT KOMPONEN MAPS
@@ -373,6 +339,41 @@ const stats = ref([
     textColor: 'text-amber-600' 
   },
 ]);
+const pageTitle = computed(() => {
+  if (desaInfo.value?.nama_desa) {
+    return `${desaInfo.value.nama_desa} – Kecamatan Bener Kabupaten Purworejo`
+  }
+  return 'Desa Sidomukti – Kecamatan Bener Kabupaten Purworejo'
+})
+
+const pageDescription = computed(() => {
+  if (desaInfo.value?.visi) {
+    return desaInfo.value.visi
+  }
+  return 'Website resmi Desa Sidomukti Kecamatan Bener Kabupaten Purworejo. Informasi profil desa, berita, potensi, transparansi, dan layanan masyarakat.'
+})
+
+useHead({
+  title: pageTitle,
+  meta: [
+    {
+      name: 'description',
+      content: pageDescription
+    },
+    {
+      property: 'og:title',
+      content: pageTitle
+    },
+    {
+      property: 'og:description',
+      content: pageDescription
+    },
+    {
+      property: 'og:type',
+      content: 'website'
+    }
+  ]
+})
 
 const go = (page, category = null) => {
   if (category) {
