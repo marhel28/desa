@@ -6,8 +6,8 @@ const authStore = useAuthStore();
 
 // Form Data
 const form = reactive({
-  email: 'ammar@gmail.com', // Default value sesuai request
-  password: 'ammar123'      // Default value sesuai request
+  email: '', // Default value sesuai request
+  password: ''      // Default value sesuai request
 });
 
 const handleLogin = async () => {
