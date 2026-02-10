@@ -286,7 +286,7 @@
 
 <script setup>
 import { ref, computed, onMounted } from 'vue';
-import { watch, computed } from 'vue'
+import { watch } from 'vue'
 import { useHead } from '@vueuse/head'
 const seoTitle = computed(() => {
   return profilDesa.value?.nama_desa
