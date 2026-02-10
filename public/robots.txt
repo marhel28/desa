@@ -1,0 +1,13 @@
+User-agent: *
+Allow: /
+
+Disallow: /login
+Disallow: /dashboard
+Disallow: /desa-admin
+Disallow: /statistik-admin
+Disallow: /berita-admin
+Disallow: /agenda-admin
+Disallow: /potensi-admin
+Disallow: /transparansi-admin
+
+Sitemap: https://desa-sidomukti.com/sitemap.xml
