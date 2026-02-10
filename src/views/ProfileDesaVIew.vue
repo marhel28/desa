@@ -111,7 +111,7 @@
                 </div>
                 <div class="relative min-h-[400px] overflow-hidden group">
                   <img 
-                    src="https://images.unsplash.com/photo-1533659828870-95ee305cee3e?q=80&w=2835&auto=format&fit=crop" 
+                    :src="sejarah_desa" 
                     class="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
                   />
                   <div class="absolute inset-0 bg-emerald-900/20 group-hover:bg-emerald-900/10 transition-colors"></div>
@@ -314,6 +314,8 @@
 import { ref, onMounted, nextTick, computed, defineComponent, h } from 'vue';
 import { History, Target, Users, Quote, BarChart2, Briefcase, ArrowUp, ArrowDown, ArrowRight, ArrowLeft } from 'lucide-vue-next';
 import { fetchSupabase } from '@/service/api.js';
+
+import sejarah_desa from "@/assets/backends.jpg"
 
 // --- SUB COMPONENT: STAFF CARD (Unified Green Style) ---
 const StaffCard = defineComponent({

@@ -37,16 +37,16 @@ const router = createRouter({
         },
         {
           path: 'berita',
-          name: 'berita-desa',
+          name: 'Berita desa',
           component: DesaPageView,
           children: [
             {
               path: 'agenda',
-              name: 'public-agenda',
+              name: 'agenda',
               component: AgendaDesa
             },
             {
-              path: 'detail', // Lebih baik gunakan nama yang jelas
+              path: 'beritaperpage', // Lebih baik gunakan nama yang jelas
               name: 'berita-detail',
               component: BeritaPerPage
             }

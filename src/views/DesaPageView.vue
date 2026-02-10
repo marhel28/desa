@@ -249,7 +249,7 @@ const allAgendas = ref([]);
 const categories = ['Semua', 'Pengumuman', 'Pembangunan', 'Kegiatan', 'Layanan'];
 
 // --- HELPERS ---
-const isMainPage = computed(() => route.name === 'Berita Desa');
+const isMainPage = computed(() => route.name === 'Berita desa');
 
 const stripHtml = (html) => {
    if (!html) return "";

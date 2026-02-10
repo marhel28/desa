@@ -226,7 +226,7 @@ const calendarAttributes = computed(() => {
 
 // --- HELPERS ---
 const goBack = () => {
-  router.push({ name: 'Berita Desa' }); 
+  router.push({ name: 'Berita desa' }); 
 };
 
 const formatDateFull = (date) => {
