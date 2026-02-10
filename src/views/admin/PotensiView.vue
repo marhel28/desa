@@ -153,6 +153,17 @@
 
                 <div>
                   <label class="label-pro">Geotagging</label>
+                  <div class="mb-3 relative">
+                    <input 
+                      v-model="manualGmapsUrl" 
+                      @input="parseGmapsUrl"
+                      type="text" 
+                      class="input-pro text-[11px] pr-10" 
+                      placeholder="Paste link Google Maps di sini untuk auto-tag..."
+                    >
+                    <MapPin class="absolute right-4 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-emerald-500" />
+                  </div>
+                  
                   <div id="mapPicker"
                     class="w-full h-48 md:h-64 bg-slate-100 rounded-[1.5rem] md:rounded-[2rem] border border-slate-200 overflow-hidden z-0"></div>
                   <div class="grid grid-cols-2 gap-3 mt-3">
@@ -253,6 +264,7 @@ const filterKategori = ref("");
 
 const imageFiles = ref([]);
 const previewImages = ref([]);
+const manualGmapsUrl = ref("");
 
 let map = null;
 let marker = null;
@@ -267,66 +279,86 @@ const form = reactive({
 const KATEGORI_OPTIONS = ["WISATA", "EKONOMI_KREATIF", "PERTANIAN", "PETERNAKAN", "PERIKANAN", "KELEMBAGAAN", "LAINNYA"];
 const JENIS_OPTIONS = ["WISATA_ALAM", "WISATA_BUATAN", "WISATA_BUDAYA", "KULINER", "KRIYA", "INDUSTRI_RUMAHAN", "AGRIKULTUR", "PERKEBUNAN", "PETERNAKAN", "PERIKANAN", "KELOMPOK_TANI", "BUMDES", "KOPERASI", "UMKM_LAINNYA", "LAINNYA"];
 
-const filteredList = computed(() =>
-  !filterKategori.value ? rawList.value : rawList.value.filter(i => i.kategori === filterKategori.value)
-);
+// ================= PERBAIKAN UTAMA PADA SUBMIT FORM =================
 
-const loadLeaflet = () => {
-  if (!document.getElementById('leaflet-css')) {
-    const l = document.createElement('link');
-    l.rel = 'stylesheet'; l.id = 'leaflet-css';
-    l.href = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css';
-    document.head.appendChild(l);
+const submitForm = async () => {
+  // Validasi foto hanya untuk data baru
+  if (!isEditing.value && imageFiles.value.length === 0) {
+    return Swal.fire('Error', 'Wajib mengunggah minimal 1 foto.', 'error');
   }
-  if (!window.L) {
-    const s = document.createElement('script');
-    s.src = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js';
-    document.head.appendChild(s);
+
+  isSubmitting.value = true;
+  try {
+    const method = isEditing.value ? 'PUT' : 'POST';
+    const url = isEditing.value
+      ? `${api.defaults.baseURL}${API_URL}/${form.id}`
+      : `${api.defaults.baseURL}${API_URL}/with-gallery`;
+
+    let body;
+    let headers = {};
+
+    if (!isEditing.value) {
+      // MENGGUNAKAN FORMDATA UNTUK UPLOAD GALERI
+      body = new FormData();
+      
+      // List field yang harus dikirim ke backend /with-gallery
+      const fields = [
+        'nama', 'kategori', 'jenis', 'deskripsi', 'lokasi', 
+        'pengelola', 'kontak_wa', 'harga_min', 'harga_max', 'satuan_harga'
+      ];
+
+      fields.forEach(k => {
+        // Kirim string kosong atau null sebagai string kosong agar tidak error 422 di int fields
+        const value = (form[k] === null || form[k] === undefined) ? "" : form[k];
+        body.append(k, value);
+      });
+
+      // Append Files (Wajib loop dengan key yang sama yaitu 'files')
+      imageFiles.value.forEach(file => {
+        body.append('files', file);
+      });
+
+    } else {
+      // MENGGUNAKAN JSON UNTUK UPDATE
+      headers['Content-Type'] = 'application/json';
+      body = JSON.stringify(form);
+    }
+
+    const res = await fetch(url, { method, headers, body });
+    
+    if (!res.ok) {
+      const errData = await res.json();
+      // Menangkap detail error dari FastAPI (biasanya di errData.detail)
+      const errorMsg = Array.isArray(errData.detail) 
+        ? errData.detail.map(e => `${e.loc.join('.')}: ${e.msg}`).join('<br>')
+        : errData.detail || "Gagal menyimpan data";
+        
+      throw new Error(errorMsg);
+    }
+
+    Swal.fire({ icon: 'success', title: 'Berhasil Tersimpan', showConfirmButton: false, timer: 1500 });
+    closeModal();
+    fetchData();
+  } catch (e) {
+    Swal.fire({
+      icon: 'error',
+      title: 'Gagal',
+      html: `<div class="text-left text-xs">${e.message}</div>`,
+    });
+  } finally {
+    isSubmitting.value = false;
   }
 };
 
-const initMap = (lat = DEFAULT_LAT, lng = DEFAULT_LNG) => {
-  if (!window.L) return;
-  if (map) map.remove(); // Hapus map lama sebelum inisialisasi baru
-  
-  // Pastikan container ada sebelum init
-  const mapContainer = document.getElementById('mapPicker');
-  if(!mapContainer) return;
-
-  map = window.L.map('mapPicker', { zoomControl: false }).setView([lat || DEFAULT_LAT, lng || DEFAULT_LNG], 15);
-  window.L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png').addTo(map);
-  
-  if (form.latitude && form.longitude) {
-    placeMarker(form.latitude, form.longitude);
-  } else {
-    // Jika data baru, tidak pasang marker default agar user memilih sendiri, atau pasang di tengah
-    // placeMarker(DEFAULT_LAT, DEFAULT_LNG); 
-  }
-  
-  map.on('click', (e) => placeMarker(e.latlng.lat, e.latlng.lng));
-  
-  // Fix map render issue on modal open
-  setTimeout(() => { map.invalidateSize(); }, 200);
-};
-
-const placeMarker = (lat, lng) => {
-  if (marker) marker.setLatLng([lat, lng]);
-  else marker = window.L.marker([lat, lng], { draggable: true }).addTo(map);
-  form.latitude = lat;
-  form.longitude = lng;
-};
-
-// ================= API =================
+// ================= FUNGSI LAINNYA (TETAP) =================
 
 const fetchData = async () => {
   isLoading.value = true;
   try {
     const r = await fetch(`${api.defaults.baseURL}${API_URL}/`);
     const data = await r.json();
-    // Validasi data array
     rawList.value = Array.isArray(data) ? data : []; 
   } catch (error) {
-    console.error("Fetch Error:", error);
     rawList.value = [];
   } finally {
     isLoading.value = false;
@@ -344,10 +376,6 @@ const handleFileUpload = (e) => {
     reader.onload = (ex) => previewImages.value.push(ex.target.result);
     reader.readAsDataURL(file);
   });
-
-  if (selectedFiles.length > remainingSlots) {
-    Swal.fire({ icon: 'info', title: 'Limit Foto', text: 'Maksimal 3 foto yang dapat diunggah.' });
-  }
 };
 
 const removeImage = (index) => {
@@ -355,94 +383,27 @@ const removeImage = (index) => {
   previewImages.value.splice(index, 1);
 };
 
-const submitForm = async () => {
-  if (!isEditing.value && imageFiles.value.length === 0) {
-    return Swal.fire('Error', 'Wajib mengunggah minimal 1 foto.', 'error');
-  }
-
-  isSubmitting.value = true;
-  try {
-    const method = isEditing.value ? 'PUT' : 'POST';
-    const url = isEditing.value
-      ? `${api.defaults.baseURL}${API_URL}/${form.id}`
-      : `${api.defaults.baseURL}${API_URL}/with-gallery`;
-
-    let body;
-    let headers = {};
-
-    if (!isEditing.value) {
-      body = new FormData();
-      Object.keys(form).forEach(k => {
-        if (form[k] !== null && form[k] !== undefined) body.append(k, form[k]);
-      });
-      imageFiles.value.forEach(file => body.append('files', file));
-    } else {
-      headers['Content-Type'] = 'application/json';
-      body = JSON.stringify(form);
-    }
-
-    const res = await fetch(url, { method, headers, body });
-    if (!res.ok) {
-      const errData = await res.json();
-      throw new Error(errData.detail || "Gagal menyimpan data");
-    }
-
-    Swal.fire({ icon: 'success', title: 'Berhasil Tersimpan', showConfirmButton: false, timer: 1500 });
-    closeModal();
-    fetchData();
-  } catch (e) {
-    Swal.fire('Gagal', e.message, 'error');
-  } finally {
-    isSubmitting.value = false;
-  }
-};
-
 const deleteData = async (id) => {
   const res = await Swal.fire({ 
     title: 'Hapus data ini?', 
-    text: "Data yang dihapus tidak dapat dikembalikan",
     icon: 'warning', 
     showCancelButton: true, 
-    confirmButtonColor: '#ef4444',
-    cancelButtonColor: '#cbd5e1',
     confirmButtonText: 'Ya, Hapus'
   });
   
   if (res.isConfirmed) {
     try {
       await fetch(`${api.defaults.baseURL}${API_URL}/${id}`, { method: 'DELETE' });
-      Swal.fire('Terhapus', 'Data berhasil dihapus', 'success');
       fetchData();
     } catch(e) {
-      Swal.fire('Error', 'Gagal menghapus data', 'error');
+      Swal.fire('Error', 'Gagal menghapus', 'error');
     }
   }
 };
 
-// ================= UI =================
-
-const openModal = () => {
-  resetForm();
-  showModal.value = true;
-  nextTick(() => initMap());
-};
-
-const editData = (item) => {
-  isEditing.value = true;
-  Object.assign(form, item);
-  showModal.value = true;
-  nextTick(() => initMap(item.latitude, item.longitude));
-};
-
-const closeModal = () => {
-  showModal.value = false;
-  if (map) {
-    map.remove();
-    map = null;
-  }
-  marker = null;
-};
-
+const openModal = () => { resetForm(); showModal.value = true; nextTick(() => initMap()); };
+const editData = (item) => { isEditing.value = true; Object.assign(form, item); showModal.value = true; nextTick(() => initMap(item.latitude, item.longitude)); };
+const closeModal = () => { showModal.value = false; if (map) map.remove(); map = null; marker = null; };
 const resetForm = () => {
   isEditing.value = false;
   Object.assign(form, {
@@ -455,22 +416,101 @@ const resetForm = () => {
   previewImages.value = [];
 };
 
-const formatEnum = (s) => s?.replace(/_/g, ' ') || '-';
-const formatRupiah = (n) =>
-  new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(n);
+const parseGmapsUrl = () => {
+  if (!manualGmapsUrl.value) return;
 
-const getBadgeColor = (c) =>
-  ({ WISATA: 'bg-emerald-500', EKONOMI_KREATIF: 'bg-amber-500', PERTANIAN: 'bg-lime-600', PETERNAKAN: 'bg-orange-500' }[c] || 'bg-slate-500');
+  // Regex yang lebih kuat untuk menangkap lat/lng dalam berbagai format URL (dengan @ atau tanpa @)
+  // Mencari pola angka desimal yang dipisahkan koma
+  const regex = /(-?\d+\.\d+),\s*(-?\d+\.\d+)/;
+  const match = manualGmapsUrl.value.match(regex);
+
+  if (match) {
+    const lat = parseFloat(match[1]);
+    const lng = parseFloat(match[2]);
+    
+    // Validasi sederhana agar tidak menangkap angka acak yang bukan koordinat
+    if (Math.abs(lat) <= 90 && Math.abs(lng) <= 180) {
+      placeMarker(lat, lng);
+      
+      // Feedback visual (opsional): kosongkan input setelah berhasil agar user tahu input diproses
+      // manualGmapsUrl.value = ""; 
+    }
+  } else {
+    // Jika tidak ketemu koordinat, kita coba cari di parameter query 'q=' atau 'query='
+    const urlParams = new URLSearchParams(manualGmapsUrl.value.split('?')[1]);
+    const query = urlParams.get('q') || urlParams.get('query');
+    if (query && query.includes(',')) {
+      const parts = query.split(',');
+      const lat = parseFloat(parts[0]);
+      const lng = parseFloat(parts[1]);
+      if (!isNaN(lat) && !isNaN(lng)) {
+        placeMarker(lat, lng);
+      }
+    }
+  }
+};
+const initMap = (lat = DEFAULT_LAT, lng = DEFAULT_LNG) => {
+  if (!window.L || !document.getElementById('mapPicker')) return;
+  if (map) map.remove();
+
+  // Inisialisasi map
+  map = window.L.map('mapPicker', { 
+    zoomControl: true,
+    attributionControl: false 
+  }).setView([lat, lng], 16);
+
+  // LAYER REALISTIS (Google Hybrid: Satelit + Nama Jalan)
+  const googleHybrid = window.L.tileLayer('https://{s}.google.com/vt/lyrs=y&x={x}&y={y}&z={z}', {
+    maxZoom: 20,
+    subdomains: ['mt0', 'mt1', 'mt2', 'mt3']
+  }).addTo(map);
+
+  // Tambahkan Marker
+  if (form.latitude && form.longitude) {
+    placeMarker(form.latitude, form.longitude);
+  }
+
+  map.on('click', (e) => placeMarker(e.latlng.lat, e.latlng.lng));
+};
+
+const placeMarker = (lat, lng) => {
+  if (!map) return; // Pastikan map sudah di-init
+
+  if (marker) {
+    marker.setLatLng([lat, lng]);
+  } else {
+    marker = window.L.marker([lat, lng], { draggable: true }).addTo(map);
+    // Tambahkan event drag jika marker digeser manual di peta
+    marker.on('dragend', function (e) {
+      const pos = e.target.getLatLng();
+      form.latitude = pos.lat;
+      form.longitude = pos.lng;
+    });
+  }
+
+  form.latitude = lat; 
+  form.longitude = lng;
+
+  // Gerakkan kamera peta ke lokasi baru dengan animasi
+  map.flyTo([lat, lng], 17); 
+};
+
+const filteredList = computed(() => !filterKategori.value ? rawList.value : rawList.value.filter(i => i.kategori === filterKategori.value));
+const formatEnum = (s) => s?.replace(/_/g, ' ') || '-';
+const formatRupiah = (n) => new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(n);
+const getBadgeColor = (c) => ({ WISATA: 'bg-emerald-500', EKONOMI_KREATIF: 'bg-amber-500', PERTANIAN: 'bg-lime-600' }[c] || 'bg-slate-500');
 
 onMounted(() => {
-  loadLeaflet();
+  // Load Leaflet dinamik jika belum ada
+  if (!window.L) {
+    const l = document.createElement('link'); l.rel = 'stylesheet'; l.href = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css'; document.head.appendChild(l);
+    const s = document.createElement('script'); s.src = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js'; document.head.appendChild(s);
+  }
   fetchData();
 });
 </script>
 
 <style scoped>
-
-
 .shadow-soft {
   box-shadow: 0 10px 30px -15px rgba(0, 0, 0, 0.1);
 }
@@ -509,4 +549,7 @@ onMounted(() => {
 .animate-modal-up {
   animation: modalUp 0.4s ease-out forwards;
 }
+
+/* Reusable Classes for consistency */
+
 </style>

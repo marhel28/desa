@@ -104,10 +104,8 @@
                   ></div>
                 </div>
               </div>
-              
               <div v-if="pendapatanData.length === 0" class="py-12 text-center">
-                <FileText class="w-12 h-12 text-slate-200 mx-auto mb-4"/>
-                <p class="text-slate-400 italic text-sm">Menunggu publikasi data pendapatan...</p>
+                <p class="text-slate-400 italic text-sm">Belum ada data pendapatan.</p>
               </div>
             </div>
           </div>
@@ -136,10 +134,8 @@
                   ></div>
                 </div>
               </div>
-
               <div v-if="belanjaData.length === 0" class="py-12 text-center">
-                <FileText class="w-12 h-12 text-slate-200 mx-auto mb-4"/>
-                <p class="text-slate-400 italic text-sm">Menunggu publikasi data belanja...</p>
+                <p class="text-slate-400 italic text-sm">Belum ada data belanja.</p>
               </div>
             </div>
           </div>
@@ -150,22 +146,19 @@
             <div class="max-w-xl">
               <span class="text-emerald-600 font-black uppercase tracking-[0.2em] text-[10px] bg-emerald-50 px-3 py-1 rounded-lg">Update Fisik Lapangan</span>
               <h2 class="text-3xl md:text-4xl font-black text-slate-800 mt-4 leading-tight">Progress Pembangunan</h2>
-              <p class="text-slate-500 mt-2 font-medium">Realisasi titik pembangunan infrastruktur yang dibiayai dana desa tahun ini.</p>
-            </div>
-            <div class="flex items-center gap-2 text-slate-400 text-xs font-bold bg-white px-4 py-2 rounded-xl border border-slate-100">
-               <Calendar class="w-4 h-4" /> {{ currentYear }}
+              <p class="text-slate-500 mt-2 font-medium">Realisasi titik pembangunan infrastruktur {{ currentYear }}.</p>
             </div>
           </div>
 
           <div v-if="pembangunanData.length > 0" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             <div v-for="item in pembangunanData" :key="item.id" class="bg-white rounded-3xl shadow-soft border border-slate-100 overflow-hidden hover:shadow-2xl transition-all duration-500 group flex flex-col h-full">
-              <div class="h-48 bg-slate-100 relative overflow-hidden flex items-center justify-center">
+              <div class="h-56 bg-slate-100 relative overflow-hidden flex items-center justify-center">
                 <img v-if="item.foto" :src="item.foto" class="absolute inset-0 w-full h-full object-cover group-hover:scale-110 transition-transform duration-[2s]" />
-                <div v-else class="absolute inset-0 opacity-10 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] bg-emerald-900"></div>
+                <div v-else class="absolute inset-0 bg-emerald-900/10 flex items-center justify-center">
+                   <Hammer class="w-12 h-12 text-emerald-200" />
+                </div>
                 
-                <MapPin class="w-12 h-12 text-white opacity-40 group-hover:opacity-100 group-hover:scale-110 transition-all relative z-10" />
-                
-                <div class="absolute top-6 right-6 bg-white/90 backdrop-blur px-4 py-1.5 rounded-full text-[10px] font-black shadow-2xl z-20 flex items-center gap-2"
+                <div class="absolute top-4 right-4 bg-white/95 backdrop-blur px-4 py-1.5 rounded-full text-[10px] font-black shadow-lg z-20 flex items-center gap-2"
                      :class="item.persentase >= 100 ? 'text-emerald-600' : 'text-amber-600'">
                   <div class="w-2 h-2 rounded-full" :class="item.persentase >= 100 ? 'bg-emerald-500' : 'bg-amber-500 animate-pulse'"></div>
                   {{ item.persentase || 0 }}% REALISASI
@@ -174,17 +167,16 @@
               
               <div class="p-8 flex flex-col flex-grow">
                 <h4 class="font-black text-slate-800 mb-2 leading-tight text-lg group-hover:text-emerald-600 transition-colors">{{ item.nama }}</h4>
-                <p class="text-xs text-slate-400 mb-6 flex items-center gap-1 font-bold uppercase tracking-wider">
-                  <Banknote class="w-3.5 h-3.5 text-emerald-500" /> {{ formatRupiah(item.nominal) }}
-                </p>
+                <div class="flex items-center gap-2 mb-6">
+                   <MapPin class="w-3.5 h-3.5 text-slate-300" />
+                   <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{{ item.keterangan || 'Lokasi Kegiatan' }}</span>
+                </div>
                 
-                <div class="mt-auto">
-                  <div class="w-full bg-slate-50 rounded-full h-3 mb-3 border border-slate-100 p-0.5">
-                    <div class="h-full bg-emerald-500 rounded-full shadow-[0_0_8px_rgba(16,185,129,0.3)] transition-all duration-1000" :style="{ width: `${item.persentase || 0}%` }"></div>
-                  </div>
-                  <div class="flex justify-between items-center">
-                    <span class="text-[10px] font-black text-slate-300 uppercase tracking-widest">{{ item.keterangan || 'In Progress' }}</span>
-                    <span class="text-[10px] font-black text-emerald-600">{{ item.persentase }}%</span>
+                <div class="mt-auto border-t border-slate-50 pt-6">
+                  <p class="text-[10px] font-black text-emerald-600 mb-2 uppercase tracking-widest">Anggaran Dialokasikan</p>
+                  <p class="font-black text-slate-800 text-lg mb-4">{{ formatRupiah(item.nominal) }}</p>
+                  <div class="w-full bg-slate-50 rounded-full h-2 mb-2 border border-slate-100">
+                    <div class="h-full bg-emerald-500 rounded-full transition-all duration-1000" :style="{ width: `${item.persentase || 0}%` }"></div>
                   </div>
                 </div>
               </div>
@@ -192,33 +184,32 @@
           </div>
 
           <div v-else class="bg-white rounded-[3rem] border border-slate-100 shadow-soft p-20 text-center">
-             <div class="bg-emerald-50 w-24 h-24 rounded-[2rem] flex items-center justify-center mx-auto mb-8 rotate-12 group-hover:rotate-0 transition-all">
-               <Hammer class="w-10 h-10 text-emerald-500" />
-             </div>
-             <h3 class="text-2xl font-black text-slate-800 mb-3 tracking-tighter">Infrastruktur Masih Direncanakan</h3>
-             <p class="text-slate-400 max-w-md mx-auto text-sm leading-relaxed">Belum ada titik pembangunan fisik yang diinput. Seluruh dokumentasi akan dipublikasikan secara bertahap.</p>
+              <h3 class="text-2xl font-black text-slate-800 mb-3 tracking-tighter">Data Fisik Belum Tersedia</h3>
+              <p class="text-slate-400 max-w-md mx-auto text-sm leading-relaxed">Dokumentasi pembangunan sedang dalam proses verifikasi lapangan.</p>
           </div>
         </div>
 
         <div class="bg-emerald-950 rounded-[3rem] p-10 md:p-20 relative overflow-hidden text-center text-white shadow-2xl animate-fade-in-up" style="animation-delay: 600ms;">
           <div class="absolute -right-20 -top-20 w-80 h-80 bg-emerald-500 rounded-full blur-[120px] opacity-20"></div>
-          <div class="absolute -left-20 -bottom-20 w-80 h-80 bg-teal-400 rounded-full blur-[120px] opacity-10"></div>
-
+          
           <div class="relative z-10">
             <h2 class="text-3xl md:text-5xl font-black mb-6 tracking-tighter">Transparansi <span class="text-emerald-400">Tanpa Batas</span></h2>
             <p class="text-emerald-100/70 mb-12 max-w-2xl mx-auto font-medium text-base md:text-xl leading-relaxed">
-              Kami berkomitmen menyediakan akses dokumen secara utuh. Unduh salinan resmi dokumen perencanaan desa di sini.
+              Kami berkomitmen menyediakan akses dokumen secara utuh. Unduh salinan resmi melalui link di bawah ini.
             </p>
             
-            <div class="flex flex-col sm:flex-row justify-center gap-6">
-              <a href="#" class="bg-white text-emerald-950 px-10 py-5 rounded-2xl font-black uppercase text-xs tracking-widest hover:bg-emerald-50 hover:scale-105 transition-all flex items-center justify-center gap-3 shadow-2xl group">
+            <div v-if="desaInfo?.link_transparansi" class="flex flex-col sm:flex-row justify-center gap-6">
+              <a :href="desaInfo.link_transparansi" target="_blank" class="bg-white text-emerald-950 px-10 py-5 rounded-2xl font-black uppercase text-xs tracking-widest hover:bg-emerald-50 hover:scale-105 transition-all flex items-center justify-center gap-3 shadow-2xl group">
                 <FileText class="w-5 h-5 group-hover:text-emerald-600" />
                 Dokumen APBDes {{ currentYear }}
               </a>
-              <a href="#" class="bg-emerald-800/30 backdrop-blur-xl border border-emerald-500/30 text-emerald-200 px-10 py-5 rounded-2xl font-black uppercase text-xs tracking-widest hover:bg-emerald-800/50 hover:text-white transition-all flex items-center justify-center gap-3">
+              <a :href="desaInfo.link_transparansi" target="_blank" class="bg-emerald-800/30 backdrop-blur-xl border border-emerald-500/30 text-emerald-200 px-10 py-5 rounded-2xl font-black uppercase text-xs tracking-widest hover:bg-emerald-800/50 hover:text-white transition-all flex items-center justify-center gap-3">
                 <FileText class="w-5 h-5" />
                 Dokumen RKPDes {{ currentYear }}
               </a>
+            </div>
+            <div v-else class="py-4 px-8 bg-white/5 border border-white/10 rounded-2xl inline-block">
+               <p class="text-emerald-300 text-xs font-bold uppercase tracking-widest">Dokumen publik belum diunggah</p>
             </div>
           </div>
         </div>
@@ -232,27 +223,31 @@ import { ref, onMounted, computed } from 'vue';
 import { 
   TrendingUp, ShoppingCart, Wallet, 
   PieChart, BarChart3, MapPin, 
-  Banknote, FileText, AlertTriangle, Hammer,Calendar
+  Banknote, FileText, Hammer, Calendar
 } from 'lucide-vue-next';
 import { fetchSupabase } from '@/service/api.js';
 
 // --- STATE ---
 const isLoading = ref(true);
-const errorMsg = ref(null);
 const rawData = ref([]);
+const desaInfo = ref(null);
 const currentYear = ref(new Date().getFullYear());
 
 // --- FETCH DATA ---
 const loadData = async () => {
   isLoading.value = true;
-  errorMsg.value = null;
   try {
-    const { data, error } = await fetchSupabase('transparansi', `tahun_anggaran=eq.${currentYear.value}&is_published=eq.true`);
-    if (error) throw new Error(error);
-    if (data) rawData.value = data;
+    // 1. Ambil Data Transparansi
+    const { data: transData } = await fetchSupabase('transparansi', `tahun_anggaran=eq.${currentYear.value}&is_published=eq.true`);
+    if (transData) rawData.value = transData;
+
+    // 2. Ambil Data Desa untuk Link Transparansi
+    const { data: dData } = await fetchSupabase('desa');
+    if (dData && dData.length > 0) {
+      desaInfo.value = dData[0]; // Ambil row pertama
+    }
   } catch (e) {
-    console.error('System Error:', e);
-    errorMsg.value = "Koneksi ke server terputus. Silakan muat ulang halaman.";
+    console.error('Fetch Error:', e);
   } finally {
     isLoading.value = false;
   }
@@ -273,7 +268,7 @@ const pendapatanData = computed(() => {
 const belanjaData = computed(() => {
   const filtered = rawData.value.filter(item => {
     const k = item.kategori.toUpperCase();
-    return k !== 'PENDAPATAN' && k !== 'APBDES';
+    return k !== 'PENDAPATAN' && k !== 'APBDES' && k !== 'PEMBANGUNAN';
   });
 
   const grouped = filtered.reduce((acc, curr) => {
@@ -316,44 +311,30 @@ const penyerapanPersen = computed(() => {
   return ((summary.value.belanja / summary.value.pendapatan) * 100).toFixed(1);
 });
 
-// --- HELPER ---
 const formatRupiah = (num) => {
   return new Intl.NumberFormat('id-ID', {
     style: 'currency', currency: 'IDR', minimumFractionDigits: 0, maximumFractionDigits: 0,
   }).format(num);
 };
 
-onMounted(() => {
-  loadData();
-});
+onMounted(loadData);
 </script>
 
 <style scoped>
-.shadow-soft {
-  box-shadow: 0 10px 40px -10px rgba(0,0,0,0.05);
-}
-
-.animate-fade-in {
-  animation: fadeIn 1s ease-out;
-}
-
+.shadow-soft { box-shadow: 0 10px 40px -10px rgba(0,0,0,0.05); }
+.animate-fade-in { animation: fadeIn 1s ease-out; }
 .animate-fade-in-up {
   animation: fadeInUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-  opacity: 0;
-  transform: translateY(40px);
+  opacity: 0; transform: translateY(40px);
 }
-
 .animate-fade-in-down {
   animation: fadeInDown 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-  opacity: 0;
-  transform: translateY(-40px);
+  opacity: 0; transform: translateY(-40px);
 }
-
 .animate-grow-width {
   animation: growWidth 1.5s cubic-bezier(0.65, 0, 0.35, 1) forwards;
   width: 0;
 }
-
 @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 @keyframes fadeInUp { to { opacity: 1; transform: translateY(0); } }
 @keyframes fadeInDown { to { opacity: 1; transform: translateY(0); } }

@@ -3,7 +3,8 @@ import { ref, reactive, onMounted } from 'vue';
 import api from '@/service/apis';
 import { 
   Save, Trash2, UploadCloud, Info, Map as MapIcon, 
-  UserCircle, Phone, Mail, Globe, CheckCircle, AlertCircle, X 
+  UserCircle, Phone, Mail, Globe, CheckCircle, AlertCircle, X,
+  Facebook, Instagram, Youtube
 } from 'lucide-vue-next';
 
 // --- STATE ---
@@ -30,6 +31,10 @@ const defaultState = {
   nomor_desa: '',
   email_desa: '',
   link_transparansi: '',
+  // Tambahan Social Media
+  facebook_url: '',
+  instagram_url: '',
+  youtube_url: '',
   kades: '', sekdes: '', kaur_perencanaan: '', kaur_keuangan: '',
   kasi_pemerintahan: '', kasi_kesra: '', kadus_1: '', kadus_2: '',
   foto_kades_path: null, foto_sekdes_path: null, foto_kaur_perencanaan_path: null,
@@ -296,6 +301,24 @@ onMounted(fetchProfilDesa);
                   <input v-model="form.link_transparansi" type="url" placeholder="https://..." class="w-full bg-slate-50 border-none rounded-xl p-3 text-sm font-bold"/>
                 </div>
               </div>
+            </div>
+            
+            <div class="mt-6 pt-6 border-t border-slate-100 space-y-4">
+               <label class="block text-[10px] font-black text-slate-400 uppercase mb-1 tracking-widest">Media Sosial</label>
+               <div class="grid grid-cols-1 gap-3">
+                  <div class="flex items-center gap-3 bg-slate-50 rounded-xl px-3 py-1">
+                    <Facebook class="w-4 h-4 text-blue-600" />
+                    <input v-model="form.facebook_url" type="url" placeholder="URL Facebook" class="flex-1 bg-transparent border-none p-2 text-xs font-bold focus:ring-0"/>
+                  </div>
+                  <div class="flex items-center gap-3 bg-slate-50 rounded-xl px-3 py-1">
+                    <Instagram class="w-4 h-4 text-pink-600" />
+                    <input v-model="form.instagram_url" type="url" placeholder="URL Instagram" class="flex-1 bg-transparent border-none p-2 text-xs font-bold focus:ring-0"/>
+                  </div>
+                  <div class="flex items-center gap-3 bg-slate-50 rounded-xl px-3 py-1">
+                    <Youtube class="w-4 h-4 text-red-600" />
+                    <input v-model="form.youtube_url" type="url" placeholder="URL YouTube" class="flex-1 bg-transparent border-none p-2 text-xs font-bold focus:ring-0"/>
+                  </div>
+               </div>
             </div>
           </div>
         </div>

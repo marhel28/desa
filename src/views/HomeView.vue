@@ -37,7 +37,7 @@
             {{ desaInfo?.nama_desa || 'Desa Sidomukti' }}
           </h1>
           <h2 class="text-xl md:text-2xl font-light text-emerald-100 mb-8 tracking-widest uppercase border-b border-emerald-400/30 pb-4 inline-block animate-fade-in-up delay-100">
-            Kecamatan Purworejo, Jawa Tengah
+            Kecamatan Bener, Jawa Tengah
           </h2>
 
           <p class="text-lg md:text-xl mb-10 max-w-3xl mx-auto leading-relaxed text-slate-100 font-light opacity-90 animate-fade-in-up delay-200">
@@ -99,7 +99,7 @@
                 </div>
                 
                 <div v-if="pinnedNews.length === 0" class="p-6 text-center text-slate-400 text-sm">
-                   Tidak ada pengumuman aktif.
+                    Tidak ada pengumuman aktif.
                 </div>
 
                 <div v-else class="divide-y divide-slate-100">
@@ -199,7 +199,15 @@
               </div>
             </div>
 
-            <div class="bg-gradient-to-r from-emerald-900 to-teal-800 rounded-3xl p-8 md:p-12 relative overflow-hidden shadow-2xl text-white mb-16">
+            <div class="mb-16">
+              <VidioCard />
+            </div>
+
+            <div class="mb-16">
+              <Maps />
+            </div>
+
+            <div class="bg-gradient-to-br from-emerald-900 to-teal-800 rounded-3xl p-8 md:p-12 relative overflow-hidden shadow-2xl text-white mb-16">
               <div class="absolute top-0 right-0 p-4 opacity-10">
                 <svg width="200" height="200" viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
                   <path d="M100 0C44.7715 0 0 44.7715 0 100C0 155.228 44.7715 200 100 200C155.228 200 200 155.228 200 100C200 44.7715 155.228 0 100 0ZM100 180C55.8172 180 20 144.183 20 100C20 55.8172 55.8172 20 100 20C144.183 20 180 55.8172 180 100C180 144.183 144.183 180 100 180Z" fill="white"/>
@@ -270,19 +278,25 @@
           </div>
         </div>
       </section>
+      <BubbleUp></BubbleUp>
 
     </main>
   </div>
 </template>
 
 <script setup>
+import VidioCard from '@/components/VidioCard.vue';
+import BubbleUp from '@/components/BubbleUp.vue';
+
 import { ref, onMounted, computed } from 'vue';
 import { useRouter } from 'vue-router'; 
-// Import Swiper & Modules
 import { Swiper, SwiperSlide } from 'swiper/vue';
 import { Autoplay as SwiperAutoplay, EffectFade as SwiperEffectFade } from 'swiper/modules';
 import 'swiper/css';
 import 'swiper/css/effect-fade';
+
+// IMPORT KOMPONEN MAPS
+import Maps from '@/components/Maps.vue';
 
 import { 
   Users, MapPin, TrendingUp, ArrowRight, 
@@ -290,7 +304,7 @@ import {
 } from 'lucide-vue-next';
 import { fetchSupabase } from '@/service/api.js';
 
-const router = useRouter(); // Pastikan menggunakan router dari hook
+const router = useRouter();
 const desaInfo = ref(null);
 const statistikInfo = ref(null);
 const isLoading = ref(true);
@@ -298,26 +312,6 @@ const isLoading = ref(true);
 const pinnedNews = ref([]);
 const agendaList = ref([]);
 const latestNews = ref([]);
-
-const go = (page, category = null) => {
-  if (category) {
-    router.push({ name: page, query: { filter: category } });
-  } else {
-    router.push({ name: page });
-  }
-};
-
-// Fungsi navigasi khusus berita per page
-const goToBerita = (uuid) => {
-  router.push(`berita/beritaperpage?id=${uuid}`);
-};
-
-const coverList = computed(() => {
-  if (desaInfo.value?.cover_desa_path) {
-    return desaInfo.value.cover_desa_path.split(',').map(item => item.trim());
-  }
-  return ['https://images.unsplash.com/photo-1500382017468-9049fed747ef?q=80&w=2832&auto=format&fit=crop'];
-});
 
 const stats = ref([
   { 
@@ -337,11 +331,30 @@ const stats = ref([
   { 
     icon: TrendingUp, 
     label: 'Dana Desa Terserap', 
-    value: '94%', 
+    value: '0%', 
     bgColor: 'bg-amber-50', 
     textColor: 'text-amber-600' 
   },
 ]);
+
+const go = (page, category = null) => {
+  if (category) {
+    router.push({ name: page, query: { filter: category } });
+  } else {
+    router.push({ name: page });
+  }
+};
+
+const goToBerita = (uuid) => {
+  router.push(`berita/beritaperpage?id=${uuid}`);
+};
+
+const coverList = computed(() => {
+  if (desaInfo.value?.cover_desa_path) {
+    return desaInfo.value.cover_desa_path.split(',').map(item => item.trim());
+  }
+  return ['https://images.unsplash.com/photo-1500382017468-9049fed747ef?q=80&w=2832&auto=format&fit=crop'];
+});
 
 const highlights = [
   { title: 'Profil & Visi Misi', description: 'Kenali sejarah, visi, misi, serta struktur pemerintahan desa yang melayani Anda.', action: '/profile', icon: FileText },
@@ -380,7 +393,15 @@ const loadDashboardData = async () => {
     const { data: news } = await fetchSupabase('berita', 'select=*&order=tanggal.desc&limit=2');
     if (news) latestNews.value = news;
 
-    updateStatsUI();
+    const currentYear = new Date().getFullYear();
+    const { data: trans } = await fetchSupabase('transparansi', `select=*&tahun_anggaran=eq.${currentYear}&jenis=eq.RINGKASAN&limit=1`);
+    
+    let serapanValue = '94%';
+    if (trans && trans.length > 0) {
+      serapanValue = `${trans[0].persentase}%`;
+    }
+
+    updateStatsUI(serapanValue);
   } catch (e) {
     console.error("Error loading dashboard:", e);
   } finally {
@@ -388,13 +409,14 @@ const loadDashboardData = async () => {
   }
 };
 
-const updateStatsUI = () => {
+const updateStatsUI = (serapan) => {
   if(statistikInfo.value) {
       stats.value[0].value = `${statistikInfo.value.total_penduduk.toLocaleString()}`;
   }
   if(desaInfo.value && desaInfo.value.luas_wilayah) {
       stats.value[1].value = `${desaInfo.value.luas_wilayah} km²`;
   }
+  stats.value[2].value = serapan;
 };
 
 const navigate = (page) => {

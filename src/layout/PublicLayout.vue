@@ -102,7 +102,7 @@
                 {{ item.name }}
               </router-link>
             </template>
-            <a :href="desaInfo?.link_transparansi || '/dashboard'" target="_blank" class="btn-transparansi">Login</a>
+            <a :href=" '/dashboard'" target="_blank" class="btn-transparansi">Login</a>
           </div>
 
           <button @click="isMobileMenuOpen = !isMobileMenuOpen" class="lg:hidden p-2 rounded-lg bg-emerald-50 text-emerald-700">
@@ -144,7 +144,7 @@
               </router-link>
             </template>
             <div class="pt-4 px-4 pb-2">
-              <a :href="desaInfo?.link_transparansi || '/dashboard'" target="_blank" class="block w-full text-center py-3.5 rounded-xl bg-emerald-600 text-white font-bold shadow-lg">
+              <a :href=" '/dashboard'" target="_blank" class="block w-full text-center py-3.5 rounded-xl bg-emerald-600 text-white font-bold shadow-lg">
                 Login
               </a>
             </div>

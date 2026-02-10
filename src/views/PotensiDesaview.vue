@@ -4,11 +4,10 @@
     <div class="relative bg-emerald-950 h-[450px] flex items-center justify-center overflow-hidden">
       <div class="absolute inset-0 opacity-40">
         <img 
-  src="https://images.unsplash.com/photo-1625246333195-78d9c38ad449?q=80&w=2940&auto=format&fit=crop" 
-  alt="Latar Belakang Desa" 
-  class="w-full h-full object-cover animate-slow-zoom"
-/>
-
+          src="https://images.unsplash.com/photo-1625246333195-78d9c38ad449?q=80&w=2940&auto=format&fit=crop" 
+          alt="Latar Belakang Desa" 
+          class="w-full h-full object-cover animate-slow-zoom"
+        />
       </div>
       <div class="absolute inset-0 bg-gradient-to-t from-slate-50 via-emerald-900/60 to-emerald-950/0"></div>
       
@@ -18,11 +17,23 @@
           Jelajahi Kekayaan Lokal
         </span>
         <h1 class="text-4xl md:text-6xl font-extrabold text-white mb-6 tracking-tight drop-shadow-xl leading-tight">
-          Potensi Unggulan <br/> <span class="text-transparent bg-clip-text bg-gradient-to-r from-emerald-200 to-teal-400">Desa Sidomukti</span>
+          Potensi Unggulan <br/> <span class="text-transparent bg-clip-text bg-gradient-to-r from-emerald-200 to-teal-400">{{ profilDesa.nama_desa || 'Desa Sidomukti' }}</span>
         </h1>
         <p class="text-slate-200 text-base md:text-lg font-light leading-relaxed max-w-2xl mx-auto opacity-90">
           Menyingkap pesona wisata alam, kearifan budaya, serta produk ekonomi kreatif hasil tangan terampil warga desa kami.
         </p>
+
+        <div class="flex justify-center gap-4 mt-8">
+          <a v-if="profilDesa.facebook_url" :href="profilDesa.facebook_url" target="_blank" class="text-white/70 hover:text-white transition-colors">
+            <Facebook class="w-5 h-5" />
+          </a>
+          <a v-if="profilDesa.instagram_url" :href="profilDesa.instagram_url" target="_blank" class="text-white/70 hover:text-white transition-colors">
+            <Instagram class="w-5 h-5" />
+          </a>
+          <a v-if="profilDesa.youtube_url" :href="profilDesa.youtube_url" target="_blank" class="text-white/70 hover:text-white transition-colors">
+            <Youtube class="w-5 h-5" />
+          </a>
+        </div>
       </div>
     </div>
 
@@ -150,12 +161,16 @@
         <div class="relative z-10 max-w-3xl mx-auto">
           <h2 class="text-3xl md:text-5xl font-bold text-white mb-6 leading-tight">Tertarik Berkolaborasi?</h2>
           <p class="text-emerald-100 mb-10 text-lg leading-relaxed font-light">
-            Kami membuka peluang sebesar-besarnya bagi investor, akademisi, dan pegiat sosial untuk bersama mengembangkan potensi Desa Sidomukti menuju desa mandiri.
+            Kami membuka peluang sebesar-besarnya bagi investor, akademisi, dan pegiat sosial untuk bersama mengembangkan potensi Desa Sidomukti menuju desa mandiri melalui unit usaha BUMDes.
           </p>
           <div class="flex flex-col sm:flex-row justify-center gap-4">
-             <button class="bg-amber-400 hover:bg-amber-500 text-emerald-950 px-8 py-4 rounded-full font-bold shadow-lg shadow-amber-900/20 transition-all transform hover:-translate-y-1 flex items-center justify-center gap-2">
-               <Phone class="w-5 h-5" /> Hubungi BUMDes
-             </button>
+             <a 
+              :href="profilDesa.nomor_bumdes ? `https://wa.me/${formatPhone(profilDesa.nomor_bumdes)}` : '#'" 
+              target="_blank"
+              class="bg-amber-400 hover:bg-amber-500 text-emerald-950 px-8 py-4 rounded-full font-bold shadow-lg shadow-amber-900/20 transition-all transform hover:-translate-y-1 flex items-center justify-center gap-2"
+             >
+               <Phone class="w-5 h-5" /> Hubungi BUMDes: {{ profilDesa.nomor_bumdes || 'None' }}
+             </a>
           </div>
         </div>
       </div>
@@ -246,7 +261,7 @@
             </div>
             <div v-else-if="selectedItem.maps_url" class="mb-8">
                 <a :href="selectedItem.maps_url" target="_blank" class="flex items-center justify-center gap-2 w-full py-3 border-2 border-slate-200 rounded-xl text-slate-600 font-bold hover:border-emerald-500 hover:text-emerald-600 transition-colors">
-                   <Map class="w-5 h-5" /> Lihat Lokasi di Peta
+                    <Map class="w-5 h-5" /> Lihat Lokasi di Peta
                 </a>
             </div>
 
@@ -271,18 +286,18 @@
 
 <script setup>
 import { ref, computed, onMounted } from 'vue';
-import berita from "@/assets/berita-image.jpeg"
 import { 
   LayoutGrid, Mountain, Palette, Sprout, 
   Fish, Users, MoreHorizontal, Store, MapPin, 
-  ArrowUpRight, Phone, Download, Search, AlertCircle, Sparkles,
-  X, User, MessageCircle, Map
+  ArrowUpRight, Phone, Search, AlertCircle, Sparkles,
+  X, User, MessageCircle, Map, Facebook, Instagram, Youtube
 } from 'lucide-vue-next';
 
 import { fetchSupabase } from '@/service/api'; 
 
 // --- STATE MANAGEMENT ---
 const rawData = ref([]);
+const profilDesa = ref({});
 const isLoading = ref(true);
 const errorMessage = ref(null);
 const activeCategory = ref('ALL');
@@ -318,14 +333,20 @@ const fetchData = async () => {
   errorMessage.value = null;
 
   try {
-    const { data, error } = await fetchSupabase(
+    // Fetch Potensi
+    const { data: potensi, error: errPotensi } = await fetchSupabase(
       'potensi_desa', 
       'is_published=eq.true&is_aktif=eq.true'
     );
+    if (errPotensi) throw new Error(errPotensi);
+    rawData.value = potensi || [];
 
-    if (error) throw new Error(error);
+    // Fetch Profil Desa (untuk nama desa, nomor bumdes, dan sosmed)
+    const { data: desa, error: errDesa } = await fetchSupabase('desa');
+    if (!errDesa && desa.length > 0) {
+      profilDesa.value = desa[0];
+    }
 
-    rawData.value = data || [];
     calculateStats();
   } catch (err) {
     console.error("Fetch Error:", err);
@@ -339,45 +360,38 @@ const fetchData = async () => {
 
 const openModal = (item) => {
   selectedItem.value = item;
-  
-  // Logic Penggabungan Foto Utama + Galeri JSON
   let images = [];
-  
-  // 1. Masukkan foto utama jika ada
-  if (item.foto_path) {
-    images.push(item.foto_path);
-  }
-  
-  // 2. Masukkan array galeri_path (karena jsonb otomatis jadi array di JS)
+  if (item.foto_path) images.push(item.foto_path);
   if (item.galeri_path && Array.isArray(item.galeri_path)) {
     images = [...images, ...item.galeri_path];
   }
-  
-  // Hapus duplikat dan null/empty string
   galleryList.value = [...new Set(images)].filter(img => img);
-  
-  // Set foto pertama sebagai active
   activeGalleryImage.value = galleryList.value.length > 0 
     ? galleryList.value[0] 
     : 'https://placehold.co/600x400?text=No+Image';
 
   isModalOpen.value = true;
-  document.body.style.overflow = 'hidden'; // Prevent background scroll
+  document.body.style.overflow = 'hidden';
 };
 
 const closeModal = () => {
   isModalOpen.value = false;
   selectedItem.value = null;
-  document.body.style.overflow = ''; // Restore scroll
+  document.body.style.overflow = '';
 };
 
-const getWhatsAppLink = (number, name) => {
-  if (!number) return '#';
-  // Bersihkan nomor (ganti 08xxx jadi 628xxx)
+const formatPhone = (number) => {
+  if (!number) return '';
   let cleanNumber = number.toString().replace(/\D/g, '');
   if (cleanNumber.startsWith('0')) {
     cleanNumber = '62' + cleanNumber.slice(1);
   }
+  return cleanNumber;
+}
+
+const getWhatsAppLink = (number, name) => {
+  const cleanNumber = formatPhone(number);
+  if (!cleanNumber) return '#';
   const text = encodeURIComponent(`Halo, saya tertarik dengan potensi desa "${name}". Bisa minta info lebih lanjut?`);
   return `https://wa.me/${cleanNumber}?text=${text}`;
 };
@@ -422,25 +436,15 @@ onMounted(() => fetchData());
 </script>
 
 <style scoped>
-/* Modal Animation */
-.modal-enter-active,
-.modal-leave-active {
-  transition: opacity 0.3s ease;
-}
-.modal-enter-from,
-.modal-leave-to {
-  opacity: 0;
-}
+.modal-enter-active, .modal-leave-active { transition: opacity 0.3s ease; }
+.modal-enter-from, .modal-leave-to { opacity: 0; }
 
 @keyframes modal-up {
   from { opacity: 0; transform: translateY(20px) scale(0.95); }
   to { opacity: 1; transform: translateY(0) scale(1); }
 }
-.animate-modal-up {
-  animation: modal-up 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-}
+.animate-modal-up { animation: modal-up 0.3s cubic-bezier(0.16, 1, 0.3, 1); }
 
-/* Base Animations */
 @keyframes slow-zoom {
   0% { transform: scale(1); }
   100% { transform: scale(1.1); }
