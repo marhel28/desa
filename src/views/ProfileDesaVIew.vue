@@ -311,46 +311,10 @@
 </template>
 
 <script setup>
-import { useHead } from '@vueuse/head'
-import { watch } from 'vue'
 
 import { ref, onMounted, nextTick, computed, defineComponent, h } from 'vue';
 import { History, Target, Users, Quote, BarChart2, Briefcase, ArrowUp, ArrowDown, ArrowRight, ArrowLeft } from 'lucide-vue-next';
 import { fetchSupabase } from '@/service/api.js';
-const profilDesa = ref({});
-const seoTitle = computed(() => {
-  return profilDesa.value?.nama_desa
-    ? `Potensi Unggulan ${profilDesa.value.nama_desa} – Kecamatan Bener Kabupaten Purworejo`
-    : 'Potensi Unggulan Desa Sidomukti – Kecamatan Bener Kabupaten Purworejo'
-})
-
-const seoDescription = computed(() => {
-  return profilDesa.value?.deskripsi
-    || 'Informasi potensi unggulan Desa Sidomukti meliputi wisata, UMKM, pertanian, peternakan, perikanan, dan kelembagaan desa.'
-})
-useHead({
-  title: seoTitle,
-  meta: [
-    {
-      name: 'description',
-      content: seoDescription
-    },
-    {
-      property: 'og:title',
-      content: seoTitle
-    },
-    {
-      property: 'og:description',
-      content: seoDescription
-    },
-    {
-      property: 'og:type',
-      content: 'website'
-    }
-  ]
-})
-
-
 
 import sejarah_desa from "@/assets/backends.jpg"
 
