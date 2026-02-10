@@ -1,5 +1,21 @@
 @import "tailwindcss";
 
+.input-pro {
+    @apply w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-xs md:text-sm font-semibold text-slate-700 outline-none focus:border-emerald-500 focus:bg-white transition-all placeholder:text-slate-400 placeholder:font-medium;
+  }
+  
+  .label-pro {
+    @apply block text-[10px] md:text-[11px] font-black uppercase text-slate-400 mb-2 tracking-wider;
+  }
+  
+  .status-pill {
+    @apply flex items-center gap-2 px-4 py-3 rounded-xl border border-slate-200 text-slate-400 font-bold text-[10px] uppercase cursor-pointer hover:bg-slate-50 transition-all select-none;
+  }
+  
+  .status-pill.active {
+    @apply bg-emerald-50 border-emerald-500 text-emerald-700;
+  }
+
 .label-pro { @apply block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2; }
  .input-pro { @apply w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold focus:bg-white focus:border-emerald-500 outline-none transition-all; }
  .status-pill { @apply flex-1 py-2 rounded-xl border-2 border-slate-100 text-[9px] font-black uppercase flex items-center justify-center cursor-pointer transition-all grayscale opacity-50 bg-white; }
