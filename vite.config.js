@@ -4,7 +4,8 @@ import { defineConfig } from 'vite'
 import vue from '@vitejs/plugin-vue'
 import vueJsx from '@vitejs/plugin-vue-jsx'
 import vueDevTools from 'vite-plugin-vue-devtools'
-import { sitemapPlugin } from 'vite-plugin-sitemap'
+import sitemap from 'vite-plugin-sitemap'
+
 
 export default defineConfig({
   plugins: [
@@ -14,7 +15,7 @@ export default defineConfig({
     vueDevTools(),
 
     // 🔥 SITEMAP
-    sitemapPlugin({
+    sitemap({
       hostname: 'https://desa-sidomukti.com',
       routes: [
         '/',
