@@ -184,7 +184,7 @@ const readTime = computed(() => {
 // --- NAVIGATION ---
 const goBack = () => {
   // Kembali ke halaman parent (Berita Desa)
-  router.push({ name: 'Berita Desa' });
+  router.back();
 };
 
 const goToDetail = (id) => {

@@ -14,6 +14,15 @@ import MainLayout from "@/layout/MainLayout.vue"
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
+  scrollBehavior(to, from, savedPosition) {
+    // Jika ada posisi yang disimpan (saat klik tombol back/forward browser)
+    if (savedPosition) {
+      return savedPosition
+    } else {
+      // Selalu scroll ke paling atas (x: 0, y: 0)
+      return { top: 0, behavior: 'smooth' } // Tambahkan behavior smooth jika ingin efek halus
+    }
+  },
   routes: [
     // --- PUBLIC ROUTES ---
     {
@@ -47,7 +56,7 @@ const router = createRouter({
             },
             {
               path: 'beritaperpage', // Lebih baik gunakan nama yang jelas
-              name: 'berita-detail',
+              name: 'beritaperpage',
               component: BeritaPerPage
             }
           ]

@@ -198,12 +198,24 @@ const menuItems = [
 ]
 
 const go = (page, category = null) => {
-  const routeName = page === 'berita' ? 'Berita Desa' : page;
+  // Pastikan string ini sama persis dengan 'name' di router.js
+  const routeName = page === 'berita' ? 'Berita desa' : page;
+  
+  const targetQuery = {};
   if (category && category !== 'Semua') {
-    router.push({ name: routeName, query: { filter: category.toLowerCase() } });
-  } else {
-    router.push({ name: routeName });
+    targetQuery.filter = category.toLowerCase();
   }
+
+  router.push({ 
+    name: routeName, 
+    query: targetQuery 
+  }).catch(err => {
+    console.error("Navigasi gagal:", err);
+  });
+
+  // Tutup menu mobile setelah klik
+  isMobileMenuOpen.value = false;
+  isBeritaOpen.value = false;
 };
 
 const initAnimations = () => {
