@@ -41,6 +41,7 @@
     "vite": "beta",
     "vite-plugin-sitemap": "^0.8.2",
     "vite-plugin-vue-devtools": "^8.0.5",
+    "vite-ssg": "^28.3.0",
     "vitest": "^4.0.16"
   }
 }
