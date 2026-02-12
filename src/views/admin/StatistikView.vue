@@ -51,7 +51,7 @@ const isGenderMismatch = computed(() => form.total_penduduk !== totalGender.valu
 const fetchStatistik = async () => {
   isLoading.value = true;
   try {
-    const response = await api.get('/statistik');
+    const response = await api.get('/statistik/');
     
     // Jika ada data
     if (response.data) {
