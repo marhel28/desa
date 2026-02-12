@@ -25,7 +25,6 @@ export const useAuthStore = defineStore('auth', {
         localStorage.setItem('token', data.token);
         localStorage.setItem('user', JSON.stringify(data.user));
 
-        // Arahkan ke rute admin yang baru
         return true;
       } catch (error) {
         this.errorMessage = error.response?.data?.detail || 'Login gagal';

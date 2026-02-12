@@ -228,24 +228,53 @@ const go = (page, category = null) => {
 };
 
 const initAnimations = () => {
-  const targetName = desaInfo.value?.nama_desa || 'DESA SIDOMUKTI';
+  const targetName = desaInfo.value?.nama_desa 
+    ? ` ${desaInfo.value.nama_desa.toUpperCase()}` 
+    : 'DESA SIDOMUKTI';
   
-  // Animasi Typing (SEO Aman karena teks asli sudah ada di DOM)
-  gsap.to(brandName.value, {
-    duration: 2.5,
-    text: targetName,
-    ease: "power1.inOut",
-    repeat: -1,
+  const tl = gsap.timeline({ repeat: -1 });
+
+  // 1. Efek Mengetik dengan sedikit variasi kecepatan agar natural
+  tl.to(brandName.value, {
+    duration: 2,
+    text: {
+      value: targetName,
+      delimiter: ""
+    },
+    ease: "power1.inOut", // Memberikan kesan akselerasi saat mengetik
+  })
+  // 2. Efek "Glitch/Highlight" tipis saat teks sudah lengkap
+  .to(brandName.value, {
+    color: "#10b981", // Warna emerald-500 (hijau terang)
+    duration: 0.3,
     yoyo: true,
-    repeatDelay: 4,
-  });
+    repeat: 1,
+  })
+  .to({}, { duration: 4 }) // Jeda lebih lama saat teks lengkap untuk dibaca user
+  
+  // 3. Efek Menghapus yang lebih cepat (kesan 'backspace' cepat)
+  .to(brandName.value, {
+    duration: 0.8,
+    text: {
+      value: "",
+      delimiter: ""
+    },
+    ease: "none",
+  })
+  .to({}, { duration: 0.5 });
 
-  gsap.to(brandSub.value, {
-    opacity: 1, y: 0, duration: 1, delay: 0.5, ease: "power2.out"
-  });
+  // 4. Animasi Sub-judul (Kabupaten) dengan efek Slide-up + Fade
+  gsap.fromTo(brandSub.value, 
+    { opacity: 0, y: 10 },
+    { opacity: 1, y: 0, duration: 1.2, delay: 0.8, ease: "back.out(1.7)" }
+  );
 
+  // 5. Animasi Kursor Berkedip (Dibuat sedikit lebih "tegas")
   gsap.to(".cursor-blinker", {
-    opacity: 0, repeat: -1, duration: 0.6, ease: "power2.inOut"
+    opacity: 0, 
+    repeat: -1, 
+    duration: 0.4, 
+    ease: "steps(1)" 
   });
 }
 
