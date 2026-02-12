@@ -83,18 +83,6 @@
               <p class="text-sm font-black text-slate-900">{{ item.harga_min ? formatRupiah(item.harga_min) : 'Free' }}</p>
             </div>
           </div>
-
-          <div class="flex md:hidden gap-2 mt-4 pt-3 border-t border-slate-100">
-             <button @click="editData(item)" 
-               class="flex-1 bg-slate-50 text-slate-600 py-2 rounded-xl text-xs font-bold flex items-center justify-center gap-2 active:bg-slate-100 border border-slate-200">
-               <Edit3 class="w-3.5 h-3.5" /> Edit
-             </button>
-             <button @click="deleteData(item.id)" 
-               class="flex-1 bg-red-50 text-red-600 py-2 rounded-xl text-xs font-bold flex items-center justify-center gap-2 active:bg-red-100 border border-red-100">
-               <Trash2 class="w-3.5 h-3.5" /> Hapus
-             </button>
-          </div>
-
         </div>
       </div>
     </div>
@@ -110,7 +98,7 @@
               <div class="p-2 bg-emerald-100 rounded-xl text-emerald-600">
                 <Package class="w-5 h-5 md:w-6 md:h-6" />
               </div>
-              <span class="line-clamp-1">{{ isEditing ? 'Perbarui Data' : 'Tambah Potensi' }}</span>
+              <span>{{ isEditing ? 'Perbarui Data' : 'Tambah Potensi' }}</span>
             </h3>
             <button @click="closeModal" class="p-2 md:p-3 hover:bg-slate-100 rounded-2xl transition-all">
               <X class="w-5 h-5 md:w-6 md:h-6 text-slate-400" />
@@ -133,42 +121,36 @@
                           <X class="w-3 h-3" />
                         </button>
                       </div>
-
                       <div v-if="previewImages.length < 3"
                         class="relative group aspect-square rounded-2xl overflow-hidden bg-slate-50 border-2 border-dashed border-slate-200 flex flex-col items-center justify-center cursor-pointer hover:bg-emerald-50 hover:border-emerald-300 transition-colors">
-                        <input type="file" @change="handleFileUpload" accept="image/*" multiple
-                          class="absolute inset-0 opacity-0 z-20 cursor-pointer">
-                        <ImagePlus class="w-6 h-6 md:w-8 md:h-8 text-slate-400 group-hover:text-emerald-500 transition-colors" />
+                        <input type="file" @change="handleFileUpload" accept="image/*" multiple class="absolute inset-0 opacity-0 z-20 cursor-pointer">
+                        <ImagePlus class="w-6 h-6 text-slate-400 group-hover:text-emerald-500" />
                         <span class="text-[9px] font-bold text-slate-400 uppercase mt-1">Tambah</span>
                       </div>
                     </div>
-                    <p class="text-[10px] text-slate-400 italic">* Foto pertama dijadikan sampul.</p>
                   </div>
-
                   <div v-else class="flex items-center gap-4 p-4 bg-emerald-50 rounded-2xl border border-emerald-100">
                     <img :src="form.foto_path" class="w-16 h-16 rounded-xl object-cover shadow-sm bg-white">
-                    <p class="text-[10px] text-emerald-800 font-bold uppercase leading-tight">Edit foto galeri hanya tersedia pada mode tambah data baru.</p>
+                    <p class="text-[10px] text-emerald-800 font-bold uppercase leading-tight">Edit foto galeri hanya tersedia pada mode tambah baru.</p>
                   </div>
                 </div>
 
                 <div>
-                  <label class="label-pro">Geotagging</label>
+                  <label class="label-pro">Geotagging & Maps</label>
                   <div class="mb-3 relative">
-                    <input 
-                      v-model="manualGmapsUrl" 
-                      @input="parseGmapsUrl"
-                      type="text" 
-                      class="input-pro text-[11px] pr-10" 
-                      placeholder="Paste link Google Maps di sini untuk auto-tag..."
-                    >
+                    <input v-model="manualGmapsUrl" @input="parseGmapsUrl" type="text" class="input-pro text-[11px] pr-10" placeholder="Tempel Link Google Maps untuk auto-tag...">
                     <MapPin class="absolute right-4 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-emerald-500" />
                   </div>
-                  
-                  <div id="mapPicker"
-                    class="w-full h-48 md:h-64 bg-slate-100 rounded-[1.5rem] md:rounded-[2rem] border border-slate-200 overflow-hidden z-0"></div>
+                  <div id="mapPicker" class="w-full h-48 md:h-64 bg-slate-100 rounded-[1.5rem] border border-slate-200 overflow-hidden z-0"></div>
                   <div class="grid grid-cols-2 gap-3 mt-3">
-                    <input v-model="form.latitude" readonly placeholder="Lat" class="input-pro text-[10px] py-2">
-                    <input v-model="form.longitude" readonly placeholder="Lng" class="input-pro text-[10px] py-2">
+                    <div class="space-y-1">
+                        <span class="text-[9px] font-bold text-slate-400 ml-1">LATITUDE</span>
+                        <input v-model="form.latitude" readonly class="input-pro text-[10px] py-2 bg-slate-100 border-none">
+                    </div>
+                    <div class="space-y-1">
+                        <span class="text-[9px] font-bold text-slate-400 ml-1">LONGITUDE</span>
+                        <input v-model="form.longitude" readonly class="input-pro text-[10px] py-2 bg-slate-100 border-none">
+                    </div>
                   </div>
                 </div>
               </div>
@@ -212,18 +194,17 @@
 
                 <div>
                   <label class="label-pro">Deskripsi Naratif</label>
-                  <textarea v-model="form.deskripsi" rows="3" class="input-pro resize-none"
-                    placeholder="Ceritakan keunggulan potensi ini..."></textarea>
+                  <textarea v-model="form.deskripsi" rows="3" class="input-pro resize-none" placeholder="Ceritakan keunggulan potensi ini..."></textarea>
                 </div>
 
-                <div class="grid grid-cols-2 md:grid-cols-3 gap-3">
+                <div class="grid grid-cols-3 gap-3">
                   <label class="status-pill" :class="{ 'active': form.is_unggulan }">
                     <input type="checkbox" v-model="form.is_unggulan" class="hidden">⭐ Unggulan
                   </label>
                   <label class="status-pill" :class="{ 'active': form.is_aktif }">
                     <input type="checkbox" v-model="form.is_aktif" class="hidden">🟢 Aktif
                   </label>
-                  <label class="status-pill col-span-2 md:col-span-1" :class="{ 'active': form.is_published }">
+                  <label class="status-pill" :class="{ 'active': form.is_published }">
                     <input type="checkbox" v-model="form.is_published" class="hidden">🌍 Publik
                   </label>
                 </div>
@@ -232,10 +213,10 @@
           </div>
 
           <div class="px-5 py-4 md:px-8 md:py-6 border-t border-slate-100 bg-slate-50 flex justify-end gap-3 shrink-0">
-            <button @click="closeModal" class="px-4 md:px-6 py-3 font-bold text-slate-400 uppercase text-[10px]">Batal</button>
+            <button @click="closeModal" class="px-4 py-3 font-bold text-slate-400 uppercase text-[10px]">Batal</button>
             <button @click="submitForm" :disabled="isSubmitting"
-              class="bg-emerald-600 text-white px-6 md:px-10 py-3 rounded-2xl font-black uppercase text-[10px] shadow-lg shadow-emerald-100 flex items-center gap-2">
-              <Loader2 v-if="isSubmitting" class="w-3 h-3 animate-spin" /> Simpan
+              class="bg-emerald-600 text-white px-6 md:px-10 py-3 rounded-2xl font-black uppercase text-[10px] shadow-lg shadow-emerald-100 flex items-center gap-2 transition-all active:scale-95">
+              <Loader2 v-if="isSubmitting" class="w-3 h-3 animate-spin" /> Simpan Data
             </button>
           </div>
         </div>
@@ -248,109 +229,37 @@
 import { ref, reactive, onMounted, computed, nextTick } from 'vue';
 import Swal from 'sweetalert2';
 import api from '@/service/apis';
-
 import { Plus, Edit3, Trash2, X, Loader2, MapPin, ImagePlus, Filter, Phone, Package, PackageSearch } from 'lucide-vue-next';
 
+// --- CONFIG ---
 const API_URL = '/potensi';
 const DEFAULT_LAT = -7.5635;
 const DEFAULT_LNG = 110.0543;
 
+// --- STATE ---
 const rawList = ref([]);
 const isLoading = ref(false);
 const isSubmitting = ref(false);
 const showModal = ref(false);
 const isEditing = ref(false);
 const filterKategori = ref("");
-
 const imageFiles = ref([]);
 const previewImages = ref([]);
 const manualGmapsUrl = ref("");
-
 let map = null;
 let marker = null;
 
 const form = reactive({
   id: null, nama: '', kategori: '', jenis: '', deskripsi: '', lokasi: '',
   pengelola: '', kontak_wa: '', harga_min: null, harga_max: null, satuan_harga: '',
-  foto_path: null, latitude: null, longitude: null,
+  foto_path: null, latitude: null, longitude: null, maps_url: '',
   is_unggulan: false, is_aktif: true, is_published: true
 });
 
 const KATEGORI_OPTIONS = ["WISATA", "EKONOMI_KREATIF", "PERTANIAN", "PETERNAKAN", "PERIKANAN", "KELEMBAGAAN", "LAINNYA"];
 const JENIS_OPTIONS = ["WISATA_ALAM", "WISATA_BUATAN", "WISATA_BUDAYA", "KULINER", "KRIYA", "INDUSTRI_RUMAHAN", "AGRIKULTUR", "PERKEBUNAN", "PETERNAKAN", "PERIKANAN", "KELOMPOK_TANI", "BUMDES", "KOPERASI", "UMKM_LAINNYA", "LAINNYA"];
 
-// ================= PERBAIKAN UTAMA PADA SUBMIT FORM =================
-
-const submitForm = async () => {
-  // Validasi foto hanya untuk data baru
-  if (!isEditing.value && imageFiles.value.length === 0) {
-    return Swal.fire('Error', 'Wajib mengunggah minimal 1 foto.', 'error');
-  }
-
-  isSubmitting.value = true;
-  try {
-    const method = isEditing.value ? 'PUT' : 'POST';
-    const url = isEditing.value
-      ? `${api.defaults.baseURL}${API_URL}/${form.id}`
-      : `${api.defaults.baseURL}${API_URL}/with-gallery`;
-
-    let body;
-    let headers = {};
-
-    if (!isEditing.value) {
-      // MENGGUNAKAN FORMDATA UNTUK UPLOAD GALERI
-      body = new FormData();
-      
-      // List field yang harus dikirim ke backend /with-gallery
-      const fields = [
-        'nama', 'kategori', 'jenis', 'deskripsi', 'lokasi', 
-        'pengelola', 'kontak_wa', 'harga_min', 'harga_max', 'satuan_harga'
-      ];
-
-      fields.forEach(k => {
-        // Kirim string kosong atau null sebagai string kosong agar tidak error 422 di int fields
-        const value = (form[k] === null || form[k] === undefined) ? "" : form[k];
-        body.append(k, value);
-      });
-
-      // Append Files (Wajib loop dengan key yang sama yaitu 'files')
-      imageFiles.value.forEach(file => {
-        body.append('files', file);
-      });
-
-    } else {
-      // MENGGUNAKAN JSON UNTUK UPDATE
-      headers['Content-Type'] = 'application/json';
-      body = JSON.stringify(form);
-    }
-
-    const res = await fetch(url, { method, headers, body });
-    
-    if (!res.ok) {
-      const errData = await res.json();
-      // Menangkap detail error dari FastAPI (biasanya di errData.detail)
-      const errorMsg = Array.isArray(errData.detail) 
-        ? errData.detail.map(e => `${e.loc.join('.')}: ${e.msg}`).join('<br>')
-        : errData.detail || "Gagal menyimpan data";
-        
-      throw new Error(errorMsg);
-    }
-
-    Swal.fire({ icon: 'success', title: 'Berhasil Tersimpan', showConfirmButton: false, timer: 1500 });
-    closeModal();
-    fetchData();
-  } catch (e) {
-    Swal.fire({
-      icon: 'error',
-      title: 'Gagal',
-      html: `<div class="text-left text-xs">${e.message}</div>`,
-    });
-  } finally {
-    isSubmitting.value = false;
-  }
-};
-
-// ================= FUNGSI LAINNYA (TETAP) =================
+// --- LOGIC ---
 
 const fetchData = async () => {
   isLoading.value = true;
@@ -365,12 +274,126 @@ const fetchData = async () => {
   }
 };
 
+const submitForm = async () => {
+  // 1. Validasi
+  if (!isEditing.value && imageFiles.value.length === 0) {
+    return Swal.fire('Error', 'Wajib mengunggah minimal 1 foto.', 'error');
+  }
+
+  // 2. Sinkronisasi Final Maps URL
+  form.maps_url = manualGmapsUrl.value;
+
+  isSubmitting.value = true;
+  try {
+    const method = isEditing.value ? 'PUT' : 'POST';
+    const endpoint = isEditing.value 
+        ? `${API_URL}/${form.id}` 
+        : `${API_URL}/with-gallery`;
+    const url = `${api.defaults.baseURL}${endpoint}`;
+
+    let body;
+    let headers = {};
+
+    if (!isEditing.value) {
+      // POST DATA (FormData untuk Galeri)
+      body = new FormData();
+      Object.keys(form).forEach(key => {
+        if (key === 'id' || key === 'foto_path') return;
+        const val = form[key];
+        // Pastikan null/undefined dikirim sebagai string kosong agar FastAPI tidak error
+        body.append(key, (val === null || val === undefined) ? "" : val);
+      });
+      imageFiles.value.forEach(file => body.append('files', file));
+    } else {
+      // PUT DATA (JSON)
+      headers['Content-Type'] = 'application/json';
+      body = JSON.stringify(form);
+    }
+
+    const res = await fetch(url, { method, headers, body });
+    
+    if (!res.ok) {
+      const errData = await res.json();
+      throw new Error(errData.detail || "Gagal menyimpan data");
+    }
+
+    Swal.fire({ icon: 'success', title: 'Data Berhasil Disimpan', showConfirmButton: false, timer: 1500 });
+    closeModal();
+    fetchData();
+  } catch (e) {
+    Swal.fire({ icon: 'error', title: 'Terjadi Kesalahan', text: e.message });
+  } finally {
+    isSubmitting.value = false;
+  }
+};
+
+// --- MAPS LOGIC ---
+const parseGmapsUrl = () => {
+  if (!manualGmapsUrl.value) return;
+
+  // Pattern Google Maps: @lat,lng atau q=lat,lng
+  const atRegex = /@(-?\d+\.\d+),(-?\d+\.\d+)/;
+  const qRegex = /[?&](q|ll|query)=(-?\d+\.\d+),(-?\d+\.\d+)/;
+
+  let lat, lng;
+  const atMatch = manualGmapsUrl.value.match(atRegex);
+  const qMatch = manualGmapsUrl.value.match(qRegex);
+
+  if (atMatch) {
+    lat = parseFloat(atMatch[1]);
+    lng = parseFloat(atMatch[2]);
+  } else if (qMatch) {
+    lat = parseFloat(qMatch[2]);
+    lng = parseFloat(qMatch[3]);
+  }
+
+  if (lat && lng) {
+    placeMarker(lat, lng);
+  }
+};
+
+const initMap = (lat = DEFAULT_LAT, lng = DEFAULT_LNG) => {
+  if (!window.L || !document.getElementById('mapPicker')) return;
+  if (map) map.remove();
+
+  map = window.L.map('mapPicker', { zoomControl: true, attributionControl: false }).setView([lat, lng], 16);
+  window.L.tileLayer('https://{s}.google.com/vt/lyrs=y&x={x}&y={y}&z={z}', {
+    maxZoom: 20, subdomains: ['mt0', 'mt1', 'mt2', 'mt3']
+  }).addTo(map);
+
+  if (form.latitude && form.longitude) {
+    placeMarker(form.latitude, form.longitude);
+  }
+
+  map.on('click', (e) => {
+    placeMarker(e.latlng.lat, e.latlng.lng);
+    manualGmapsUrl.value = `https://www.google.com/maps?q=${e.latlng.lat},${e.latlng.lng}`;
+  });
+};
+
+const placeMarker = (lat, lng) => {
+  if (!map) return;
+  if (marker) {
+    marker.setLatLng([lat, lng]);
+  } else {
+    marker = window.L.marker([lat, lng], { draggable: true }).addTo(map);
+    marker.on('dragend', (e) => {
+      const pos = e.target.getLatLng();
+      form.latitude = pos.lat;
+      form.longitude = pos.lng;
+      manualGmapsUrl.value = `https://www.google.com/maps?q=${pos.lat},${pos.lng}`;
+    });
+  }
+  form.latitude = lat;
+  form.longitude = lng;
+  map.flyTo([lat, lng], 17);
+};
+
+// --- UTILS ---
 const handleFileUpload = (e) => {
   const selectedFiles = Array.from(e.target.files);
   const remainingSlots = 3 - imageFiles.value.length;
-  const filesToAdd = selectedFiles.slice(0, remainingSlots);
-
-  filesToAdd.forEach(file => {
+  selectedFiles.slice(0, remainingSlots).forEach(file => {
     imageFiles.value.push(file);
     const reader = new FileReader();
     reader.onload = (ex) => previewImages.value.push(ex.target.result);
@@ -383,116 +406,35 @@ const removeImage = (index) => {
   previewImages.value.splice(index, 1);
 };
 
-const deleteData = async (id) => {
-  const res = await Swal.fire({ 
-    title: 'Hapus data ini?', 
-    icon: 'warning', 
-    showCancelButton: true, 
-    confirmButtonText: 'Ya, Hapus'
-  });
-  
-  if (res.isConfirmed) {
-    try {
-      await fetch(`${api.defaults.baseURL}${API_URL}/${id}`, { method: 'DELETE' });
-      fetchData();
-    } catch(e) {
-      Swal.fire('Error', 'Gagal menghapus', 'error');
-    }
-  }
-};
-
 const openModal = () => { resetForm(); showModal.value = true; nextTick(() => initMap()); };
-const editData = (item) => { isEditing.value = true; Object.assign(form, item); showModal.value = true; nextTick(() => initMap(item.latitude, item.longitude)); };
+const editData = (item) => {
+  isEditing.value = true;
+  Object.assign(form, item);
+  manualGmapsUrl.value = item.maps_url || "";
+  showModal.value = true;
+  nextTick(() => initMap(item.latitude || DEFAULT_LAT, item.longitude || DEFAULT_LNG));
+};
 const closeModal = () => { showModal.value = false; if (map) map.remove(); map = null; marker = null; };
 const resetForm = () => {
   isEditing.value = false;
+  manualGmapsUrl.value = "";
   Object.assign(form, {
     id: null, nama: '', kategori: '', jenis: '', deskripsi: '', lokasi: '',
-    pengelola: '', kontak_wa: '', harga_min: null, harga_max: null,
-    satuan_harga: '', latitude: null, longitude: null,
-    is_unggulan: false, is_aktif: true, is_published: true
+    pengelola: '', kontak_wa: '', harga_min: null, harga_max: null, satuan_harga: '',
+    latitude: null, longitude: null, maps_url: '', is_unggulan: false, is_aktif: true, is_published: true
   });
   imageFiles.value = [];
   previewImages.value = [];
 };
 
-const parseGmapsUrl = () => {
-  if (!manualGmapsUrl.value) return;
-
-  // Regex yang lebih kuat untuk menangkap lat/lng dalam berbagai format URL (dengan @ atau tanpa @)
-  // Mencari pola angka desimal yang dipisahkan koma
-  const regex = /(-?\d+\.\d+),\s*(-?\d+\.\d+)/;
-  const match = manualGmapsUrl.value.match(regex);
-
-  if (match) {
-    const lat = parseFloat(match[1]);
-    const lng = parseFloat(match[2]);
-    
-    // Validasi sederhana agar tidak menangkap angka acak yang bukan koordinat
-    if (Math.abs(lat) <= 90 && Math.abs(lng) <= 180) {
-      placeMarker(lat, lng);
-      
-      // Feedback visual (opsional): kosongkan input setelah berhasil agar user tahu input diproses
-      // manualGmapsUrl.value = ""; 
-    }
-  } else {
-    // Jika tidak ketemu koordinat, kita coba cari di parameter query 'q=' atau 'query='
-    const urlParams = new URLSearchParams(manualGmapsUrl.value.split('?')[1]);
-    const query = urlParams.get('q') || urlParams.get('query');
-    if (query && query.includes(',')) {
-      const parts = query.split(',');
-      const lat = parseFloat(parts[0]);
-      const lng = parseFloat(parts[1]);
-      if (!isNaN(lat) && !isNaN(lng)) {
-        placeMarker(lat, lng);
-      }
-    }
+const deleteData = async (id) => {
+  const res = await Swal.fire({ title: 'Hapus data?', icon: 'warning', showCancelButton: true, confirmButtonText: 'Ya, Hapus' });
+  if (res.isConfirmed) {
+    try {
+      await fetch(`${api.defaults.baseURL}${API_URL}/${id}`, { method: 'DELETE' });
+      fetchData();
+    } catch(e) { Swal.fire('Error', 'Gagal menghapus', 'error'); }
   }
-};
-const initMap = (lat = DEFAULT_LAT, lng = DEFAULT_LNG) => {
-  if (!window.L || !document.getElementById('mapPicker')) return;
-  if (map) map.remove();
-
-  // Inisialisasi map
-  map = window.L.map('mapPicker', { 
-    zoomControl: true,
-    attributionControl: false 
-  }).setView([lat, lng], 16);
-
-  // LAYER REALISTIS (Google Hybrid: Satelit + Nama Jalan)
-  const googleHybrid = window.L.tileLayer('https://{s}.google.com/vt/lyrs=y&x={x}&y={y}&z={z}', {
-    maxZoom: 20,
-    subdomains: ['mt0', 'mt1', 'mt2', 'mt3']
-  }).addTo(map);
-
-  // Tambahkan Marker
-  if (form.latitude && form.longitude) {
-    placeMarker(form.latitude, form.longitude);
-  }
-
-  map.on('click', (e) => placeMarker(e.latlng.lat, e.latlng.lng));
-};
-
-const placeMarker = (lat, lng) => {
-  if (!map) return; // Pastikan map sudah di-init
-
-  if (marker) {
-    marker.setLatLng([lat, lng]);
-  } else {
-    marker = window.L.marker([lat, lng], { draggable: true }).addTo(map);
-    // Tambahkan event drag jika marker digeser manual di peta
-    marker.on('dragend', function (e) {
-      const pos = e.target.getLatLng();
-      form.latitude = pos.lat;
-      form.longitude = pos.lng;
-    });
-  }
-
-  form.latitude = lat; 
-  form.longitude = lng;
-
-  // Gerakkan kamera peta ke lokasi baru dengan animasi
-  map.flyTo([lat, lng], 17); 
 };
 
 const filteredList = computed(() => !filterKategori.value ? rawList.value : rawList.value.filter(i => i.kategori === filterKategori.value));
@@ -501,7 +443,6 @@ const formatRupiah = (n) => new Intl.NumberFormat('id-ID', { style: 'currency', 
 const getBadgeColor = (c) => ({ WISATA: 'bg-emerald-500', EKONOMI_KREATIF: 'bg-amber-500', PERTANIAN: 'bg-lime-600' }[c] || 'bg-slate-500');
 
 onMounted(() => {
-  // Load Leaflet dinamik jika belum ada
   if (!window.L) {
     const l = document.createElement('link'); l.rel = 'stylesheet'; l.href = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css'; document.head.appendChild(l);
     const s = document.createElement('script'); s.src = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js'; document.head.appendChild(s);
@@ -511,45 +452,12 @@ onMounted(() => {
 </script>
 
 <style scoped>
-.shadow-soft {
-  box-shadow: 0 10px 30px -15px rgba(0, 0, 0, 0.1);
-}
-
-.custom-scrollbar::-webkit-scrollbar {
-  width: 4px;
-}
-
-.custom-scrollbar::-webkit-scrollbar-thumb {
-  background: #e2e8f0;
-  border-radius: 10px;
-}
-
-.modal-enter-active,
-.modal-leave-active {
-  transition: opacity 0.3s;
-}
-
-.modal-enter-from,
-.modal-leave-to {
-  opacity: 0;
-}
-
-@keyframes modalUp {
-  from {
-    opacity: 0;
-    transform: translateY(20px);
-  }
-
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-.animate-modal-up {
-  animation: modalUp 0.4s ease-out forwards;
-}
-
-/* Reusable Classes for consistency */
+.shadow-soft { box-shadow: 0 10px 30px -15px rgba(0, 0, 0, 0.1); }
+.custom-scrollbar::-webkit-scrollbar { width: 4px; }
+.custom-scrollbar::-webkit-scrollbar-thumb { background: #e2e8f0; border-radius: 10px; }
+.modal-enter-active, .modal-leave-active { transition: opacity 0.3s; }
+.modal-enter-from, .modal-leave-to { opacity: 0; }
+@keyframes modalUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+.animate-modal-up { animation: modalUp 0.4s ease-out forwards; }
 
 </style>

@@ -1,5 +1,5 @@
 <template>
-  <div class="font-montserrat min-h-screen bg-slate-50 pb-20 pt-8 animate-fade-in">
+  <div class="font-montserrat mx-20 min-h-screen bg-slate-50 pb-20 pt-8 animate-fade-in">
 
     <div v-if="isLoading" class="flex flex-col items-center justify-center h-[60vh]">
       <div class="animate-spin w-12 h-12 border-4 border-emerald-500 border-t-transparent rounded-full mb-4"></div>
@@ -40,7 +40,7 @@
           </span>
         </div>
 
-        <h1 class="text-3xl md:text-5xl font-extrabold text-slate-900 leading-tight mb-6">
+        <h1 class="text-3xl md:text-4xl font-extrabold text-slate-900 leading-tight mb-6">
           {{ news.title }}
         </h1>
 
@@ -60,7 +60,7 @@
         </div>
       </header>
 
-      <div class="relative w-full aspect-video md:aspect-[21/9] rounded-3xl overflow-hidden shadow-2xl mb-12 group">
+      <div class="relative w-full aspect-video md:aspect-[20/9] rounded-3xl overflow-hidden shadow-2xl mb-12 group">
         <img :src="getImageUrl(news)" :alt="news.title"
           class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" />
         <div class="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent"></div>
@@ -128,26 +128,43 @@
 </template>
 
 <script setup>
-import { useHead } from '@vueuse/head'
-
-
 import { ref, onMounted, computed, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
+import { useHead } from '@vueuse/head';
 import {
   ArrowLeft, Calendar, User, Clock, Share2,
   FileX, Pin
 } from 'lucide-vue-next';
 import { fetchSupabase } from '@/service/api.js';
 
+// 1. Inisialisasi Router & Route paling atas
 const route = useRoute();
 const router = useRouter();
 
-// --- STATE ---
+// 2. Definisikan Fungsi Helper (agar tersedia bagi computed/useHead)
+const getImageUrl = (item) => {
+  if (item?.image_url) return item.image_url;
+  switch (item?.tipe?.toLowerCase()) {
+    case 'pembangunan': return 'https://images.unsplash.com/photo-1541888946425-d81bb19240f5?q=80&w=2940&auto=format&fit=crop';
+    case 'kegiatan': return 'https://images.unsplash.com/photo-1511632765486-a01980e01a18?q=80&w=2940&auto=format&fit=crop';
+    case 'layanan': return 'https://images.unsplash.com/photo-1554224155-8d04cb21cd6c?q=80&w=2940&auto=format&fit=crop';
+    default: return 'https://images.unsplash.com/photo-1586772002130-b0f3daa6288b?q=80&w=2940&auto=format&fit=crop';
+  }
+};
+
+const formatDate = (dateString) => {
+  if (!dateString) return '-';
+  return new Date(dateString).toLocaleDateString('id-ID', {
+    day: 'numeric', month: 'long', year: 'numeric'
+  });
+};
+
+// 3. State Utama
 const news = ref(null);
 const relatedNews = ref([]);
 const isLoading = ref(true);
 
-
+// 4. Computed Properties untuk SEO
 const seoTitle = computed(() => {
   return news.value?.title
     ? `${news.value.title} – Desa Sidomukti`
@@ -158,8 +175,6 @@ const seoDescription = computed(() => {
   if (!news.value?.isi) {
     return 'Berita dan informasi resmi Desa Sidomukti Kecamatan Bener Kabupaten Purworejo.'
   }
-
-  // ambil teks tanpa HTML, potong ±160 karakter
   const plainText = news.value.isi.replace(/<[^>]*>?/gm, '')
   return plainText.substring(0, 160)
 })
@@ -167,39 +182,57 @@ const seoDescription = computed(() => {
 const seoImage = computed(() => {
   return getImageUrl(news.value)
 })
+
+// 5. Gunakan useHead (Sekarang semua variabel sudah siap)
 useHead({
   title: seoTitle,
   meta: [
-    {
-      name: 'description',
-      content: seoDescription
-    },
-    {
-      property: 'og:title',
-      content: seoTitle
-    },
-    {
-      property: 'og:description',
-      content: seoDescription
-    },
-    {
-      property: 'og:image',
-      content: seoImage
-    },
-    {
-      property: 'og:type',
-      content: 'article'
-    }
+    { name: 'description', content: seoDescription },
+    { property: 'og:title', content: seoTitle },
+    { property: 'og:description', content: seoDescription },
+    { property: 'og:image', content: seoImage },
+    { property: 'og:type', content: 'article' }
   ]
 })
 
+// 6. Sisa Logika (Estimasi, Data Fetching, Lifecycle)
+const readTime = computed(() => {
+  if (!news.value?.isi) return 1;
+  const text = news.value.isi.replace(/<[^>]*>?/gm, '');
+  const words = text.split(/\s+/).length;
+  return Math.ceil(words / 200);
+});
 
-// --- HELPERS ---
-const formatDate = (dateString) => {
-  if (!dateString) return '-';
-  return new Date(dateString).toLocaleDateString('id-ID', {
-    day: 'numeric', month: 'long', year: 'numeric'
-  });
+const loadNewsDetail = async () => {
+  const id = route.query.id;
+  if (!id) {
+    isLoading.value = false;
+    return;
+  }
+  isLoading.value = true;
+  try {
+    const { data } = await fetchSupabase('berita', `select=*&id=eq.${id}`);
+    if (data && data.length > 0) {
+      news.value = data[0];
+      const { data: related } = await fetchSupabase('berita', 'select=id,title,tanggal,tipe,image_url&order=tanggal.desc&limit=5');
+      if (related) {
+        relatedNews.value = related.filter(item => item.id !== id).slice(0, 4);
+      }
+    } else {
+      news.value = null;
+    }
+  } catch (e) {
+    console.error("Error loading detail:", e);
+    news.value = null;
+  } finally {
+    isLoading.value = false;
+  }
+};
+
+const goBack = () => router.back();
+const goToDetail = (id) => {
+  router.push({ name: 'beritaperpage', query: { id } });
+  window.scrollTo({ top: 0, behavior: 'smooth' });
 };
 
 const getCategoryColor = (tipe) => {
@@ -211,87 +244,11 @@ const getCategoryColor = (tipe) => {
   }
 };
 
-const getImageUrl = (item) => {
-  if (item?.image_url) return item.image_url;
-  // Fallback images
-  switch (item?.tipe?.toLowerCase()) {
-    case 'pembangunan': return 'https://images.unsplash.com/photo-1541888946425-d81bb19240f5?q=80&w=2940&auto=format&fit=crop';
-    case 'kegiatan': return 'https://images.unsplash.com/photo-1511632765486-a01980e01a18?q=80&w=2940&auto=format&fit=crop';
-    case 'layanan': return 'https://images.unsplash.com/photo-1554224155-8d04cb21cd6c?q=80&w=2940&auto=format&fit=crop';
-    default: return 'https://images.unsplash.com/photo-1586772002130-b0f3daa6288b?q=80&w=2940&auto=format&fit=crop';
-  }
-};
+onMounted(loadNewsDetail);
 
-// Estimasi waktu baca (WPM)
-const readTime = computed(() => {
-  if (!news.value?.isi) return 1;
-  const text = news.value.isi.replace(/<[^>]*>?/gm, ''); // Hapus tag HTML
-  const words = text.split(/\s+/).length;
-  const time = Math.ceil(words / 200); // 200 kata per menit
-  return time;
-});
-
-// --- NAVIGATION ---
-const goBack = () => {
-  // Kembali ke halaman parent (Berita Desa)
-  router.back();
-};
-
-const goToDetail = (id) => {
-  // Update query params, Watcher akan mendeteksi ini dan reload data
-  router.push({ name: 'beritaperpage', query: { id } });
-  window.scrollTo({ top: 0, behavior: 'smooth' });
-};
-
-// --- DATA FETCHING ---
-const loadNewsDetail = async () => {
-  const id = route.query.id;
-
-  if (!id) {
-    isLoading.value = false;
-    return;
-  }
-
-  isLoading.value = true;
-  try {
-    // 1. Fetch Main News
-    // Gunakan 'eq' untuk filter berdasarkan ID
-    const { data, error } = await fetchSupabase('berita', `select=*&id=eq.${id}`);
-
-    if (data && data.length > 0) {
-      news.value = data[0];
-
-      // 2. Fetch Related News (Fetch 4 items, exclude current ID)
-      // Note: Supabase postgrest tidak support 'neq' (not equal) dengan mudah di string query sederhana js client wrapper custom anda
-      // Jadi kita fetch lebih sedikit, lalu filter manual di client side (opsi termudah)
-      const { data: related } = await fetchSupabase('berita', 'select=id,title,tanggal,tipe,image_url&order=tanggal.desc&limit=5');
-
-      if (related) {
-        relatedNews.value = related.filter(item => item.id !== id).slice(0, 4);
-      }
-
-    } else {
-      news.value = null; // Tidak ditemukan
-    }
-
-  } catch (e) {
-    console.error("Error loading detail:", e);
-    news.value = null;
-  } finally {
-    isLoading.value = false;
-  }
-};
-
-// --- LIFECYCLE ---
-onMounted(() => {
-  loadNewsDetail();
-});
-
-// Watch route query ID untuk reload jika user klik berita lain di sidebar
 watch(() => route.query.id, (newId) => {
   if (newId) loadNewsDetail();
 });
-
 </script>
 
 <style scoped>

@@ -225,6 +225,17 @@
 
 <script setup>
 import { useHead } from '@vueuse/head'
+import { ref, computed, onMounted, watch } from 'vue';
+import { useRouter, useRoute } from 'vue-router';
+import berita from "@/assets/berita-image.jpeg"
+import { 
+  Search, Calendar, User, ArrowRight, 
+  ChevronLeft, ChevronRight, Clock, MapPin 
+} from 'lucide-vue-next';
+import { fetchSupabase } from '@/service/api.js';
+
+const router = useRouter(); 
+const route = useRoute();
 
 useHead({
   title: () => {
@@ -265,17 +276,7 @@ useHead({
   ]
 })
 
-import { ref, computed, onMounted, watch } from 'vue';
-import { useRouter, useRoute } from 'vue-router';
-import berita from "@/assets/berita-image.jpeg"
-import { 
-  Search, Calendar, User, ArrowRight, 
-  ChevronLeft, ChevronRight, Clock, MapPin 
-} from 'lucide-vue-next';
-import { fetchSupabase } from '@/service/api.js';
 
-const router = useRouter(); 
-const route = useRoute();
 
 // --- STATE ---
 const searchQuery = ref('');
