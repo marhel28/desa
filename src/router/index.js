@@ -133,11 +133,16 @@ export const routes = [
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   scrollBehavior(to, from, savedPosition) {
-    if (savedPosition) {
-      return savedPosition
-    } else {
-      return { top: 0, behavior: 'smooth' }
-    }
+    return new Promise((resolve) => {
+      // Tunggu sampai transisi selesai atau DOM siap
+      setTimeout(() => {
+        if (savedPosition) {
+          resolve(savedPosition);
+        } else {
+          resolve({ top: 0, behavior: 'smooth' });
+        }
+      }, 100); // 100ms biasanya cukup untuk SSG/SPA transition
+    });
   },
   routes,
 })
@@ -145,19 +150,21 @@ const router = createRouter({
 // --- NAVIGATION GUARD ---
 router.beforeEach((to, from, next) => {
   const isClient = typeof window !== 'undefined'
-  
+
   if (isClient) {
     const token = localStorage.getItem('token')
 
-    // 1. Proteksi Halaman Admin: Jika butuh auth tapi token kosong
+    // 1. Paksa tendang ke login jika tidak ada token
     if (to.meta.requiresAuth && !token) {
-      console.warn("Akses ditolak: Token tidak ditemukan. Melempar ke /login")
-      return next({ name: 'login' }) 
+      console.warn("Akses ditolak: Hard redirect ke /login")
+      window.location.href = '/login' 
+      return // Berhenti di sini, jangan panggil next()
     } 
     
-    // 2. Proteksi Halaman Login: Jika user sudah login (punya token) tapi maksa buka login
+    // 2. Paksa tendang ke dashboard jika sudah login tapi akses login page
     if (to.meta.requiresGuest && token) {
-      return next({ name: 'admin-dashboard' })
+      window.location.href = '/dashboard'
+      return
     }
   }
   
