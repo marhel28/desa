@@ -2,11 +2,12 @@ import { fileURLToPath, URL } from 'node:url'
 import tailwindcss from '@tailwindcss/vite'
 import { defineConfig } from 'vite'
 import vue from '@vitejs/plugin-vue'
-import vueJsx from '@vitejs/plugin-vue-jsx' // KEMBALIKAN KE SINI
+import vueJsx from '@vitejs/plugin-vue-jsx'
 import vueDevTools from 'vite-plugin-vue-devtools'
 import sitemap from 'vite-plugin-sitemap'
 
-const routes = [
+// Pindahkan daftar rute ke variabel agar bisa dipakai di sitemap dan ssgOptions
+const publicRoutes = [
   '/',
   '/lokasi',
   '/profile',
@@ -14,7 +15,8 @@ const routes = [
   '/berita/agenda',
   '/transparansi',
   '/potensi',
-  '/galeri'
+  '/galeri',
+  '/login' // Tambahkan login agar di-render statis (cepat dimuat)
 ]
 
 export default defineConfig({
@@ -22,17 +24,26 @@ export default defineConfig({
   ssgOptions: {
     script: 'async',
     formatting: 'minify',
+    // KUNCI PERBAIKAN: Hanya render halaman publik saja
+    includedRoutes(paths, routes) {
+      return publicRoutes
+    },
+    // Jika ada error saat pre-rendering rute tertentu (misal halaman admin yang butuh window)
+    onPageRenderError: (route, err) => {
+      console.warn(`Error rendering ${route}: ${err.message}`)
+    }
   },
 
   plugins: [
     vue(),
-    vueJsx(), // Pakai yang ini
+    vueJsx(),
     tailwindcss(),
     vueDevTools(),
     
     sitemap({
       hostname: 'https://desa-sidomukti.com',
-      routes: routes
+      // Gunakan publicRoutes agar dashboard admin tidak masuk ke Google Search
+      routes: publicRoutes 
     })
   ],
 

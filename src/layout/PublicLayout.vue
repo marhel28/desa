@@ -105,7 +105,7 @@
                 {{ item.name }}
               </router-link>
             </template>
-            <a href="/dashboard" class="btn-transparansi">Login</a>
+            <button @click="$router.push('/dashboard')" class="btn-transparansi">Login</button>
           </div>
 
           <button @click="isMobileMenuOpen = !isMobileMenuOpen" 

@@ -12,13 +12,10 @@ const form = reactive({
 
 const handleLogin = async () => {
   // Membentuk payload sesuai request backend: username, password, email
-  const payload = {
-    username: form.email, // Menggunakan email sebagai username
-    email: form.email,
-    password: form.password
-  };
-
-  await authStore.login(payload);
+  const success = await authStore.login(form);
+  if (success) {
+    window.location.href = '/dashboard';
+  }
 };
 </script>
 

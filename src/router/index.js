@@ -144,23 +144,23 @@ const router = createRouter({
 
 // --- NAVIGATION GUARD ---
 router.beforeEach((to, from, next) => {
-  // Cek apakah kode sedang berjalan di browser (Client) atau server (Node saat build)
   const isClient = typeof window !== 'undefined'
-
+  
   if (isClient) {
     const token = localStorage.getItem('token')
 
+    // 1. Proteksi Halaman Admin: Jika butuh auth tapi token kosong
     if (to.meta.requiresAuth && !token) {
-      next('/login')
-    } else if (to.meta.requiresGuest && token) {
-      next('/dashboard')
-    } else {
-      next()
+      console.warn("Akses ditolak: Token tidak ditemukan. Melempar ke /login")
+      return next({ name: 'login' }) 
+    } 
+    
+    // 2. Proteksi Halaman Login: Jika user sudah login (punya token) tapi maksa buka login
+    if (to.meta.requiresGuest && token) {
+      return next({ name: 'admin-dashboard' })
     }
-  } else {
-    // Jika sedang di server (build time), langsung lewatkan
-    next()
   }
+  
+  next()
 })
-
 export default router

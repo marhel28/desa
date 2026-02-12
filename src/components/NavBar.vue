@@ -38,6 +38,7 @@ const handleLogout = () => {
         showConfirmButton: false
       });
     }
+    router.push('/');
   });
 };
 </script>

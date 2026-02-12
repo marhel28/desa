@@ -1,5 +1,15 @@
 <script setup>
 import { ref, onMounted } from 'vue';
+import { useRouter } from 'vue-router'
+
+const router = useRouter()
+
+onMounted(() => {
+  const token = localStorage.getItem('token')
+  if (!token) {
+    router.replace('/login')
+  }
+})
 // Pastikan path ini sesuai dengan konfigurasi project Anda
 import api from '@/service/apis'; 
 
