@@ -1,5 +1,5 @@
 <template>
-  <div class="font-montserrat mx-20 min-h-screen bg-slate-50 pb-20 pt-8 animate-fade-in">
+  <div class="font-montserrat lg:mx-20 min-h-screen bg-slate-50 pb-20 pt-8 animate-fade-in">
 
     <div v-if="isLoading" class="flex flex-col items-center justify-center h-[60vh]">
       <div class="animate-spin w-12 h-12 border-4 border-emerald-500 border-t-transparent rounded-full mb-4"></div>
