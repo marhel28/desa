@@ -28,6 +28,7 @@
     "swiper": "^12.1.0",
     "tailwindcss": "^4.1.18",
     "v-calendar": "^3.1.2",
+    "vite-prerender-plugin": "^0.5.12",
     "vue": "^3.5.26",
     "vue-router": "^4.6.4"
   },

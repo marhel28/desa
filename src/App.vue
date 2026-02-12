@@ -8,6 +8,7 @@
           <img 
             v-if="desaInfo?.logo_desa_path" 
             :src="desaInfo.logo_desa_path" 
+            :alt="`Logo Resmi Desa ${desaInfo?.nama_desa || ''}`"
             class="w-full h-full object-contain drop-shadow-md"
           />
           <div v-else class="w-12 h-12 bg-emerald-100 rounded-full animate-pulse"></div>
@@ -15,7 +16,7 @@
 
         <div class="mt-6 overflow-hidden">
           <h1 ref="nameRef" class="text-emerald-900 font-black text-xl md:text-2xl uppercase tracking-[0.2em] opacity-0 translate-y-full">
-            {{ desaInfo?.nama_desa || 'Loading...' }}
+            {{ desaInfo?.nama_desa || 'Portal Resmi Desa' }}
           </h1>
         </div>
         
@@ -26,14 +27,15 @@
     </div>
   </Transition>
 
-  <div v-show="!isLoading" class="animate-content">
+  <main v-show="!isLoading" class="animate-content">
     <router-view></router-view>
-  </div>
+  </main>
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, watch } from 'vue'
 import { fetchSupabase } from '@/service/api.js'
+import { useHead } from '@unhead/vue' // Helper untuk SEO
 import gsap from 'gsap'
 
 const isLoading = ref(true)
@@ -45,11 +47,40 @@ const logoRef = ref(null)
 const nameRef = ref(null)
 const progressRef = ref(null)
 
+/**
+ * SEO Management
+ * Mengupdate Title dan Meta Description secara dinamis
+ */
+useHead({
+  title: 'Memuat Halaman...',
+  meta: [
+    { name: 'description', content: 'Selamat datang di Website Resmi Desa.' },
+    { property: 'og:type', content: 'website' }
+  ]
+})
+
+// Update SEO saat data desa berhasil dimuat
+watch(desaInfo, (newVal) => {
+  if (newVal) {
+    useHead({
+      title: `Desa ${newVal.nama_desa} - Website Resmi`,
+      meta: [
+        { 
+          name: 'description', 
+          content: `Portal informasi resmi Desa ${newVal.nama_desa}. Layanan publik, berita desa, dan transparansi data.` 
+        },
+        { property: 'og:title', content: `Desa ${newVal.nama_desa}` },
+        { property: 'og:image', content: newVal.logo_desa_path }
+      ]
+    })
+  }
+})
+
 const loadInitialData = async () => {
   const startTime = Date.now()
   
   try {
-    // Ambil data desa untuk branding di loader
+    // Ambil data desa
     const { data } = await fetchSupabase('desa', 'select=nama_desa,logo_desa_path&limit=1')
     if (data?.length) {
       desaInfo.value = data[0]
@@ -57,16 +88,20 @@ const loadInitialData = async () => {
   } catch (error) {
     console.error("Loader Error:", error)
   } finally {
-    // Pastikan loading tampil minimal 2 detik agar animasi terlihat smooth
+    // SEO FIX: Kurangi waktu tunggu agar LCP (Largest Contentful Paint) lebih cepat
     const elapsedTime = Date.now() - startTime
-    const remainingTime = Math.max(2000 - elapsedTime, 0)
+    const remainingTime = Math.max(1200 - elapsedTime, 0) // Dikurangi dari 2 detik ke 1.2 detik
 
     setTimeout(() => {
-      // Jalankan animasi penutup sebelum menghilangkan loader
-      const tl = gsap.timeline({ onComplete: () => isLoading.value = false })
-      tl.to(progressRef.value, { width: '100%', duration: 0.5 })
-        .to(logoRef.value, { scale: 0, opacity: 0, duration: 0.4, ease: "back.in" })
-        .to(nameRef.value, { y: -20, opacity: 0, duration: 0.3 }, "-=0.2")
+      const tl = gsap.timeline({ 
+        onComplete: () => {
+          isLoading.value = false
+        } 
+      })
+
+      tl.to(progressRef.value, { width: '100%', duration: 0.4 })
+        .to(logoRef.value, { scale: 0, opacity: 0, duration: 0.3, ease: "back.in" })
+        .to(nameRef.value, { y: -20, opacity: 0, duration: 0.2 }, "-=0.1")
     }, remainingTime)
   }
 }
@@ -74,7 +109,7 @@ const loadInitialData = async () => {
 onMounted(() => {
   loadInitialData()
 
-  // Animasi Orbit (Muter terus selama loading)
+  // Animasi Orbit
   gsap.to(orbit.value, {
     rotation: 360,
     duration: 1.5,
@@ -82,48 +117,43 @@ onMounted(() => {
     ease: "none"
   })
 
-  // Animasi Nama Muncul (Slide Up)
-  // Kita beri jeda sedikit menunggu data Supabase masuk
+  // Animasi Nama Muncul
   setTimeout(() => {
-    gsap.to(nameRef.value, {
-      opacity: 1,
-      y: 0,
-      duration: 0.8,
-      ease: "power4.out"
-    })
+    if (nameRef.value) {
+      gsap.to(nameRef.value, {
+        opacity: 1,
+        y: 0,
+        duration: 0.8,
+        ease: "power4.out"
+      })
+    }
     
-    gsap.to(progressRef.value, {
-      width: '70%',
-      duration: 1.5,
-      ease: "power1.inOut"
-    })
-  }, 500)
+    if (progressRef.value) {
+      gsap.to(progressRef.value, {
+        width: '70%',
+        duration: 1.5,
+        ease: "power1.inOut"
+      })
+    }
+  }, 300)
 })
 
-// Efek transisi saat loader hilang
 const onLeave = (el, done) => {
   gsap.to(el, {
     opacity: 0,
-    duration: 0.5,
+    duration: 0.4,
     onComplete: done
   })
 }
 </script>
 
-<style>
+<style scoped>
 .animate-content {
-  animation: fadeIn 0.8s ease-out;
+  animation: fadeIn 0.6s ease-out;
 }
 
 @keyframes fadeIn {
-  from { opacity: 0; transform: translateY(10px); }
+  from { opacity: 0; transform: translateY(5px); }
   to { opacity: 1; transform: translateY(0); }
-}
-
-/* Memastikan font termuat */
-body {
-  margin: 0;
-  padding: 0;
-  -webkit-font-smoothing: antialiased;
 }
 </style>
