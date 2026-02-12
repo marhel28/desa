@@ -14,7 +14,16 @@ import { routes } from './router' // Pastikan di router.js kamu export const rou
 export const createApp = ViteSSG(
   App,
   // 1. Konfigurasi Router
-  { routes },
+  { routes ,
+    scrollBehavior(to, from, savedPosition) {
+      if (savedPosition) {
+        return savedPosition
+      } else {
+        return { top: 0, left: 0 }
+      }
+    }
+  },
+  
   // 2. Fungsi Callback Hook (untuk install plugin)
   ({ app, router, routes, isClient, initialState }) => {
     // Buat head manager
