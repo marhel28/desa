@@ -12,7 +12,7 @@ import BeritaPerPage from '@/views/BeritaPerPage.vue'
 import ErrorPage from '@/views/ErrorPage.vue'
 import MainLayout from "@/layout/MainLayout.vue"
 
-// 1. EKSPOR ROUTES SECARA TERPISAH (Wajib untuk Vite-SSG)
+// 1. Export variabel routes agar bisa digunakan oleh ViteSSG di main.js
 export const routes = [
   // --- PUBLIC ROUTES ---
   {
@@ -71,9 +71,10 @@ export const routes = [
 
   // --- ADMIN / DASHBOARD ROUTES ---
   {
-    path: '/admin', // Disarankan ganti agar tidak tabrakan dengan '/' public
+    path: '/',
     component: MainLayout,
     meta: { requiresAuth: true },
+    redirect: '/dashboard',
     children: [
       {
         path: 'dashboard',
@@ -127,9 +128,8 @@ export const routes = [
     name: 'not-found',
     component: ErrorPage
   }
-];
+]
 
-// 2. LOGIC ROUTER (Tetap ada untuk mode dev/client)
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   scrollBehavior(to, from, savedPosition) {
@@ -139,24 +139,28 @@ const router = createRouter({
       return { top: 0, behavior: 'smooth' }
     }
   },
-  routes
+  routes,
 })
 
-// 3. NAVIGATION GUARD (Bungkus localStorage agar tidak error saat build/server-side)
+// --- NAVIGATION GUARD ---
 router.beforeEach((to, from, next) => {
-  // Cek apakah kita sedang di browser (Client-side)
-  const isClient = typeof window !== 'undefined';
-  
+  // Cek apakah kode sedang berjalan di browser (Client) atau server (Node saat build)
+  const isClient = typeof window !== 'undefined'
+
   if (isClient) {
-    const token = localStorage.getItem('token');
+    const token = localStorage.getItem('token')
+
     if (to.meta.requiresAuth && !token) {
-      return next('/login');
+      next('/login')
     } else if (to.meta.requiresGuest && token) {
-      return next('/admin/dashboard');
+      next('/dashboard')
+    } else {
+      next()
     }
+  } else {
+    // Jika sedang di server (build time), langsung lewatkan
+    next()
   }
-  
-  next();
-});
+})
 
 export default router
